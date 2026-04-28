@@ -48,6 +48,13 @@ function v(val: string, fallback = "[___]"): string {
   return val && val.trim() ? val.trim() : fallback;
 }
 
+function formatDate(val: string, fallback = "[___]"): string {
+  if (!val || !val.trim()) return fallback;
+  const date = new Date(val.trim() + "T00:00:00");
+  if (isNaN(date.getTime())) return val.trim();
+  return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+}
+
 function bold(text: string): TextRun {
   return new TextRun({ text, bold: true, font: "Times New Roman", size: 24 });
 }
@@ -339,11 +346,11 @@ export function generateHabeasDocument(data: CaseData): Document {
 
           numberedPara("6", normal(`Petitioner has no criminal record and no history of immigration violations other than unlawful entry in ${v(d.yearOfEntry)}.`)),
 
-          numberedPara("9", normal(`Prior to his detention on ${v(d.detentionDate)}, Petitioner had never been apprehended, detained, or placed in removal proceedings by any immigration authority. He lived openly in the United States and had no prior ICE contact of any kind.`)),
+          numberedPara("9", normal(`Prior to his detention on ${formatDate(d.detentionDate)}, Petitioner had never been apprehended, detained, or placed in removal proceedings by any immigration authority. He lived openly in the United States and had no prior ICE contact of any kind.`)),
 
           subSectionTitle("2. Detention Under \u00A71225(b)(2)(A)"),
 
-          numberedPara("10", normal(`On ${v(d.detentionDate)}, ICE apprehended Petitioner during ${v(d.apprehensionCircumstance)} and took him into custody.`)),
+          numberedPara("10", normal(`On ${formatDate(d.detentionDate)}, ICE apprehended Petitioner during ${v(d.apprehensionCircumstance)} and took him into custody.`)),
 
           numberedPara("11", normal(`ICE asserts authority to detain Petitioner under 8 U.S.C. \u00A71225(b)(2)(A), claiming he is an \u201Capplicant for admission\u201D subject to mandatory detention based on his manner of entry ${v(d.yearsInUS)} years ago.`)),
 
@@ -352,13 +359,13 @@ export function generateHabeasDocument(data: CaseData): Document {
             normal(", No. 25-20496 (5th Cir. Feb. 6, 2026).")
           ),
 
-          numberedPara("13", normal(`Petitioner has been continuously detained at ${v(d.facilityName)} since ${v(d.detentionDate)}\u2014a total of ${v(d.monthsDetained)} months to date. See attached Exhibit B: Detainee Locator.`)),
+          numberedPara("13", normal(`Petitioner has been continuously detained at ${v(d.facilityName)} since ${formatDate(d.detentionDate)}\u2014a total of ${v(d.monthsDetained)} months to date. See attached Exhibit B: Detainee Locator.`)),
 
           subSectionTitle("3. Current Removal Proceedings and Likelihood of Relief"),
 
           numberedPara("14", normal(`Petitioner is in removal proceedings before the ${v(d.immigrationCourtLocation)} Immigration Court.`)),
 
-          numberedPara("15", normal(`His next master calendar hearing is scheduled for ${v(d.nextHearingDate)}. See attached Exhibit C: Automated Case Information. ICE has provided no timeline for completion of proceedings.`)),
+          numberedPara("15", normal(`His next master calendar hearing is scheduled for ${formatDate(d.nextHearingDate)}. See attached Exhibit C: Automated Case Information. ICE has provided no timeline for completion of proceedings.`)),
 
           numberedPara("16", normal(`Petitioner has applied for ${reliefText}.`)),
 
@@ -620,25 +627,25 @@ export function generateHabeasDocument(data: CaseData): Document {
 
           // CERTIFICATES OF SERVICE
           ...generateCertificateOfService(
-            v(d.serviceDateWarden, v(d.serviceDateFieldOffice, "[DATE]")),
+            formatDate(d.serviceDateWarden || d.serviceDateFieldOffice),
             `${v(d.wardenName, "RANDY TATE").toUpperCase()}, in ${v(d.wardenTitle, "his")} Official Capacity as Warden of the ${v(d.facilityName, "Montgomery Processing Center")}`,
             `Immigration and Customs Enforcement (\u201CICE\u201D) ${v(d.facilityName, "Montgomery Processing Center")}, located at ${v(d.facilityAddress, "[ADDRESS]")}`
           ),
 
           ...generateCertificateOfService(
-            v(d.serviceDateFieldOffice, "[DATE]"),
+            formatDate(d.serviceDateFieldOffice),
             "Bret Bradford, in his Official Capacity as Field Office Director, of ICE Enforcement and Removal Operations Houston Field Office",
             "(1) Office of the Field Office Director, Enforcement and Removal Operations, Houston Field Office, 126 Northpoint Drive, Houston, Texas 77060"
           ),
 
           ...generateCertificateOfService(
-            v(d.serviceDateDHS, "[DATE]"),
+            formatDate(d.serviceDateDHS),
             "MARKWAYNE MULLIN, in his Official Capacity as Director of U.S. Department of Homeland Security",
             "(1) Office of General Counsel, U.S. Department of Homeland Security, 245 Murray Lane, SW, Mail Stop 0485, Washington, D.C. 20530"
           ),
 
           ...generateCertificateOfServiceEmail(
-            v(d.serviceDateAG, "[DATE]"),
+            formatDate(d.serviceDateAG),
             "Todd Blanche, in his Official Capacity as Acting Attorney General of the United States",
             "Office of the Attorney General, 950 Pennsylvania Avenue, NW Washington, DC 20530"
           ),
