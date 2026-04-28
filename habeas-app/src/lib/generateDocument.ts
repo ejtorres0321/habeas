@@ -540,39 +540,48 @@ export function generateHabeasDocument(data: CaseData): Document {
 
           new Paragraph({
             spacing: { after: 60 },
+            indent: { left: 4320 },
             children: [normal("Respectfully submitted,")],
           }),
           emptyLine(),
           new Paragraph({
             spacing: { after: 60 },
-            children: [normal("/s/ Manuel E. Solis")],
+            indent: { left: 4320 },
+            children: [italic("/s/ Manuel E. Solis")],
           }),
           new Paragraph({
             spacing: { after: 60 },
+            indent: { left: 4320 },
             children: [bold("Manuel E. Solis")],
           }),
           new Paragraph({
             spacing: { after: 60 },
+            indent: { left: 4320 },
             children: [normal("Attorney for Petitioner")],
           }),
           new Paragraph({
             spacing: { after: 60 },
+            indent: { left: 4320 },
             children: [normal("State Bar No. 18826790")],
           }),
           new Paragraph({
             spacing: { after: 60 },
+            indent: { left: 4320 },
             children: [normal("P.O. Box 230593")],
           }),
           new Paragraph({
             spacing: { after: 60 },
+            indent: { left: 4320 },
             children: [normal("Houston TX 77223")],
           }),
           new Paragraph({
             spacing: { after: 60 },
+            indent: { left: 4320 },
             children: [normal("Houston Office: 713-481-1030")],
           }),
           new Paragraph({
             spacing: { after: 200 },
+            indent: { left: 4320 },
             children: [normal("casestatus@manuelsolis.com")],
           }),
 
@@ -606,6 +615,26 @@ export function generateHabeasDocument(data: CaseData): Document {
   });
 }
 
+function certSignatureBlock(date: string): Paragraph[] {
+  const rightTab = { type: TabStopType.RIGHT, position: TabStopPosition.MAX };
+  return [
+    new Paragraph({
+      spacing: { after: 60 },
+      tabStops: [rightTab],
+      children: [normal("/s/ Manuel Solis"), normal("\t"), underline(date)],
+    }),
+    new Paragraph({
+      spacing: { after: 60 },
+      tabStops: [rightTab],
+      children: [normal("Manuel Solis"), normal("\t"), underline("Date")],
+    }),
+    new Paragraph({
+      spacing: { after: 300 },
+      children: [normal("Attorney for Petitioner")],
+    }),
+  ];
+}
+
 function generateCertificateOfService(date: string, respondent: string, address: string): Paragraph[] {
   return [
     centered(bold("CERTIFICATE OF SERVICE")),
@@ -613,18 +642,7 @@ function generateCertificateOfService(date: string, respondent: string, address:
       normal(`On ${date}, Counsel for Plaintiff served a copy of the attached Petition via USPS Mail, in compliance with Rule 4 of Federal Rules of Civil Procedure, upon the Respondent, ${respondent}, at the ${address}.`)
     ),
     emptyLine(),
-    new Paragraph({
-      spacing: { after: 60 },
-      children: [normal(`/s/ Manuel Solis\t\t\t${date}`)],
-    }),
-    new Paragraph({
-      spacing: { after: 60 },
-      children: [normal("Manuel Solis\t\t\t\tDate")],
-    }),
-    new Paragraph({
-      spacing: { after: 300 },
-      children: [normal("Attorney for Petitioner")],
-    }),
+    ...certSignatureBlock(date),
   ];
 }
 
@@ -635,17 +653,6 @@ function generateCertificateOfServiceEmail(date: string, respondent: string, add
       normal(`On ${date}, Counsel for Plaintiff served a copy of the attached Petition via email, in compliance with Rule 4 of Federal Rules of Civil Procedure, upon the Respondent, ${respondent}, at ${address}.`)
     ),
     emptyLine(),
-    new Paragraph({
-      spacing: { after: 60 },
-      children: [normal(`/s/ Manuel Solis\t\t\t${date}`)],
-    }),
-    new Paragraph({
-      spacing: { after: 60 },
-      children: [normal("Manuel Solis\t\t\t\tDate")],
-    }),
-    new Paragraph({
-      spacing: { after: 300 },
-      children: [normal("Attorney for Petitioner")],
-    }),
+    ...certSignatureBlock(date),
   ];
 }
