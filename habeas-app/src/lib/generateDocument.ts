@@ -203,10 +203,17 @@ export function generateHabeasDocument(data: CaseData): Document {
           centered(bold("HOUSTON DIVISION")),
           centered(bold(`CIVIL No. ${v(d.civilNo, "__________")}`)),
 
+          // Horizontal line above caption
+          new Paragraph({
+            spacing: { after: 0 },
+            border: { bottom: { style: BorderStyle.SINGLE, size: 6, space: 1, color: "000000" } },
+            children: [],
+          }),
+
           // Case caption table with § dividers
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
-            borders: topBottomBorder,
+            borders: noBorders,
             rows: [
               captionRow([normal(`${v(d.petitionerName).toUpperCase()},`)], []),
               captionRow([], []),
@@ -231,7 +238,13 @@ export function generateHabeasDocument(data: CaseData): Document {
               captionRow([italic("     Respondents.")], []),
             ],
           }),
-          emptyLine(),
+
+          // Horizontal line below caption
+          new Paragraph({
+            spacing: { after: 200 },
+            border: { bottom: { style: BorderStyle.SINGLE, size: 6, space: 1, color: "000000" } },
+            children: [],
+          }),
 
           // Title
           centered(bold("PETITION FOR WRIT OF HABEAS CORPUS PURSUANT TO 28 U.S.C. \u00A72241")),
