@@ -10,6 +10,11 @@ import {
   NumberFormat,
   UnderlineType,
   BorderStyle,
+  Table,
+  TableRow,
+  TableCell,
+  WidthType,
+  VerticalAlign,
 } from "docx";
 
 interface CaseData {
@@ -128,17 +133,34 @@ function emptyLine(): Paragraph {
   return new Paragraph({ spacing: { after: 100 }, children: [] });
 }
 
-const captionTabStop = { type: TabStopType.LEFT, position: 4680 };
-const bottomBorder = { style: BorderStyle.SINGLE, size: 6, space: 1, color: "000000" };
+const noBorder = { style: BorderStyle.NONE, size: 0, space: 0, color: "FFFFFF" };
+const noBorders = { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder };
+const topBottomBorder = {
+  top: { style: BorderStyle.SINGLE, size: 6, space: 1, color: "000000" },
+  bottom: { style: BorderStyle.SINGLE, size: 6, space: 1, color: "000000" },
+  left: noBorder,
+  right: noBorder,
+};
 
-function captionLine(left: string, right: string, leftRuns?: TextRun[]): Paragraph {
-  return new Paragraph({
-    spacing: { after: 0, line: 240 },
-    tabStops: [captionTabStop],
+function captionRow(leftRuns: TextRun[], rightRuns: TextRun[]): TableRow {
+  return new TableRow({
     children: [
-      ...(leftRuns || [normal(left)]),
-      normal("\t"),
-      normal(right),
+      new TableCell({
+        borders: noBorders,
+        width: { size: 55, type: WidthType.PERCENTAGE },
+        children: [new Paragraph({ spacing: { after: 0, line: 240 }, children: leftRuns })],
+      }),
+      new TableCell({
+        borders: noBorders,
+        width: { size: 5, type: WidthType.PERCENTAGE },
+        verticalAlign: VerticalAlign.TOP,
+        children: [new Paragraph({ spacing: { after: 0, line: 240 }, children: [normal("\u00A7")] })],
+      }),
+      new TableCell({
+        borders: noBorders,
+        width: { size: 40, type: WidthType.PERCENTAGE },
+        children: [new Paragraph({ spacing: { after: 0, line: 240 }, children: rightRuns })],
+      }),
     ],
   });
 }
@@ -181,58 +203,35 @@ export function generateHabeasDocument(data: CaseData): Document {
           centered(bold("HOUSTON DIVISION")),
           centered(bold(`CIVIL No. ${v(d.civilNo, "__________")}`)),
 
-          // Horizontal line + caption with § dividers
-          new Paragraph({
-            spacing: { after: 0, line: 240 },
-            border: { bottom: bottomBorder },
-            tabStops: [captionTabStop],
-            children: [normal(""), normal("\t"), normal("\u00A7")],
+          // Case caption table with § dividers
+          new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            borders: topBottomBorder,
+            rows: [
+              captionRow([normal(`${v(d.petitionerName).toUpperCase()},`)], []),
+              captionRow([], []),
+              captionRow([italic("     Petitioner")], []),
+              captionRow([], []),
+              captionRow([], [bold("PETITION FOR")]),
+              captionRow([normal("v.")], [bold("WRIT OF HABEAS CORPUS")]),
+              captionRow([], [bold("PURSUANT TO 28 U.S.C \u00A72241")]),
+              captionRow([normal(`${v(d.wardenName).toUpperCase()}, in ${v(d.wardenTitle, "his")} official capacity`)], []),
+              captionRow([normal(`as ${v(d.wardenTitle, "Warden")} of the ${v(d.facilityName)} Detention Center;`)], []),
+              captionRow([], []),
+              captionRow([normal("BRET BRADFORD, in his official capacity as")], []),
+              captionRow([normal("Field Office Director of ICE Enforcement and")], []),
+              captionRow([normal("Removal Operations Houston Field Office;")], []),
+              captionRow([], []),
+              captionRow([normal("MARKWAYNE MULLIN, in his official capacity as")], []),
+              captionRow([normal("Secretary of the Department of Homeland Security;")], []),
+              captionRow([], []),
+              captionRow([normal("TODD BLANCHE, in his official capacity as")], []),
+              captionRow([normal("Acting Attorney General of the United States,")], []),
+              captionRow([], []),
+              captionRow([italic("     Respondents.")], []),
+            ],
           }),
-          captionLine(`${v(d.petitionerName).toUpperCase()},`, "\u00A7"),
-          captionLine("", "\u00A7"),
-          captionLine("", "\u00A7", [italic("     Petitioner")]),
-          captionLine("", "\u00A7"),
-          new Paragraph({
-            spacing: { after: 0, line: 240 },
-            tabStops: [captionTabStop],
-            children: [normal(""), normal("\t"), normal("\u00A7   "), bold("PETITION FOR")],
-          }),
-          new Paragraph({
-            spacing: { after: 0, line: 240 },
-            tabStops: [captionTabStop],
-            children: [normal("v."), normal("\t"), normal("\u00A7   "), bold("WRIT OF HABEAS CORPUS")],
-          }),
-          new Paragraph({
-            spacing: { after: 0, line: 240 },
-            tabStops: [captionTabStop],
-            children: [normal(""), normal("\t"), normal("\u00A7   "), bold("PURSUANT TO 28 U.S.C \u00A72241")],
-          }),
-
-          // Respondents — every line has §
-          captionLine(`${v(d.wardenName).toUpperCase()}, in ${v(d.wardenTitle, "his")} official capacity`, "\u00A7"),
-          captionLine(`as ${v(d.wardenTitle, "Warden")} of the ${v(d.facilityName)}`, "\u00A7"),
-          captionLine("Detention Center;", "\u00A7"),
-          captionLine("", "\u00A7"),
-          captionLine("BRET BRADFORD, in his official capacity as", "\u00A7"),
-          captionLine("Field Office Director of ICE Enforcement and", "\u00A7"),
-          captionLine("Removal Operations Houston Field Office;", "\u00A7"),
-          captionLine("", "\u00A7"),
-          captionLine("MARKWAYNE MULLIN, in his official capacity", "\u00A7"),
-          captionLine("as Secretary of the Department of Homeland", "\u00A7"),
-          captionLine("Security;", "\u00A7"),
-          captionLine("", "\u00A7"),
-          captionLine("TODD BLANCHE, in his official capacity as", "\u00A7"),
-          captionLine("Acting Attorney General of the United States,", "\u00A7"),
-          captionLine("", "\u00A7"),
-          captionLine("", "\u00A7", [italic("     Respondents.")]),
-
-          // Horizontal line at bottom of caption
-          new Paragraph({
-            spacing: { after: 200, line: 240 },
-            border: { bottom: bottomBorder },
-            tabStops: [captionTabStop],
-            children: [normal(""), normal("\t"), normal("\u00A7")],
-          }),
+          emptyLine(),
 
           // Title
           centered(bold("PETITION FOR WRIT OF HABEAS CORPUS PURSUANT TO 28 U.S.C. \u00A72241")),
