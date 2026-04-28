@@ -15,7 +15,7 @@ For each suggestion, return an object with:
 
 Rules:
 1. Flag EMPTY required fields as errors: petitionerName, detentionDate, facilityName, wardenName, immigrationCourtLocation
-2. Check for logical inconsistencies (e.g., yearOfEntry should be before current year, yearsInUS should be consistent with yearOfEntry)
+2. Do NOT validate dates — all dates are correct as entered. Do NOT flag dates as being in the future or invalid.
 3. For narrative fields (familyDetails, spouseInfo, childrenInfo, usCitizenFamilyMembers, economicHarm, familialHarm, employmentDetails), if the content is too brief or could be more compelling for a federal court filing, suggest improved text that:
    - Uses specific, persuasive legal language
    - Emphasizes irreparable harm and due process concerns
