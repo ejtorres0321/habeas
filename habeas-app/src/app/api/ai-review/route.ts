@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4.1",
       temperature: 0.3,
       response_format: { type: "json_object" },
       messages: [
