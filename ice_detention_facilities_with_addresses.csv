@@ -1,0 +1,108 @@
+facility_name,street_address,city,state,zip,phone,operator,facility_type,aor
+Montgomery Processing Center,806 Hilbig Road,Conroe,TX,77301,936-756-4068,CoreCivic,Contract Detention Facility (CDF),Houston
+Houston Contract Detention Facility,15850 Export Plaza Drive,Houston,TX,77032,281-449-1481,CoreCivic,Contract Detention Facility (CDF),Houston
+Joe Corley Detention Facility,500 Hilbig Road,Conroe,TX,77301,936-538-2240,GEO Group,IGSA,Houston
+IAH Secure Adult Detention Facility,3400 Highway 146,Livingston,TX,77351,936-967-8000,Community Education Centers,IGSA,Houston
+South Texas ICE Processing Center,566 Veterans Drive,Pearsall,TX,78061,830-334-4422,GEO Group,Contract Detention Facility (CDF),San Antonio
+Port Isabel Service Processing Center,27991 Buena Vista Boulevard,Los Fresnos,TX,78566,956-547-1700,ICE,Service Processing Center (SPC),San Antonio
+Rio Grande Detention Center,1001 Loop 20,Laredo,TX,78043,956-728-0202,GEO Group,IGSA,San Antonio
+Laredo Processing Center,4702 East Saunders,Laredo,TX,78041,956-727-3045,CoreCivic,Contract Detention Facility (CDF),San Antonio
+El Valle Detention Facility,1005 West Hidalgo Avenue,Raymondville,TX,78580,956-689-4900,GEO Group,IGSA,San Antonio
+South Texas Family Residential Center,300 El Rancho Way,Dilley,TX,78017,830-271-7600,CoreCivic,Family Residential Center,San Antonio
+Karnes County Residential Center,409 FM 1144,Karnes City,TX,78118,830-583-4700,GEO Group,Family Residential Center,San Antonio
+T. Don Hutto Residential Center,1001 Welch Street,Taylor,TX,76574,512-218-9700,CoreCivic,Contract Detention Facility (CDF),San Antonio
+West Texas Detention Facility,1700 West IH-10,Sierra Blanca,TX,79851,915-369-3000,LaSalle Corrections,IGSA,El Paso
+El Paso Service Processing Center,8915 Montana Avenue,El Paso,TX,79925,915-225-1900,ICE,Service Processing Center (SPC),El Paso
+Bluebonnet Detention Center,300 Avenue F,Anson,TX,79501,325-823-0011,Management & Training Corp,IGSA,Dallas
+Prairieland Detention Facility,1209 Sunflower Lane,Alvarado,TX,76009,817-783-7700,LaSalle Corrections,IGSA,Dallas
+Limestone County Detention Center,1100 East Milam Street,Groesbeck,TX,76642,254-729-0156,Management & Training Corp,IGSA,Dallas
+LaSalle ICE Processing Center,830 Pine Hill Road,Jena,LA,71342,318-992-7670,GEO Group,Contract Detention Facility (CDF),New Orleans
+Pine Prairie ICE Processing Center,1133 Hampton Dupre Road,Pine Prairie,LA,70576,337-599-2700,GEO Group,Contract Detention Facility (CDF),New Orleans
+Winn Correctional Center,1318 Winnfield Bypass,Winnfield,LA,71483,318-628-3974,LaSalle Corrections,IGSA,New Orleans
+Allen Parish Public Safety Complex,7340 Highway 26,Oberlin,LA,70655,337-639-2393,Allen Parish,IGSA,New Orleans
+Richwood Correctional Center,180 Old Richwood Road,Monroe,LA,71202,318-388-7790,LaSalle Corrections,IGSA,New Orleans
+South Louisiana ICE Processing Center,3843 Stagg Avenue,Basile,LA,70515,337-432-5197,GEO Group,Contract Detention Facility (CDF),New Orleans
+River Correctional Center,968 Highway 568,Ferriday,LA,71334,318-757-9020,LaSalle Corrections,IGSA,New Orleans
+Central Louisiana ICE Processing Center,830 Pine Hill Road,Jena,LA,71342,318-992-7670,GEO Group,Contract Detention Facility (CDF),New Orleans
+Eloy Detention Center,1705 East Hanna Road,Eloy,AZ,85131,520-464-9244,CoreCivic,Contract Detention Facility (CDF),Phoenix
+La Palma Correctional Center,5501 North La Palma Road,Eloy,AZ,85131,520-464-7300,CoreCivic,Contract Detention Facility (CDF),Phoenix
+Florence Service Processing Center,3250 North Pinal Parkway,Florence,AZ,85132,520-868-5862,ICE,Service Processing Center (SPC),Phoenix
+Central Arizona Florence Correctional Complex,1100 Bowling Road,Florence,AZ,85132,520-868-9802,CoreCivic,Contract Detention Facility (CDF),Phoenix
+Adelanto ICE Processing Center,10250 Rancho Road,Adelanto,CA,92301,760-561-6100,GEO Group,Contract Detention Facility (CDF),Los Angeles
+Otay Mesa Detention Center,7488 Calzada de la Fuente,San Diego,CA,92154,619-661-9119,CoreCivic,Contract Detention Facility (CDF),San Diego
+Imperial Regional Detention Facility,1572 Gateway Road,Calexico,CA,92231,760-768-2400,Management & Training Corp,IGSA,San Diego
+Mesa Verde ICE Processing Center,425 Golden State Avenue,Bakersfield,CA,93301,661-322-4501,GEO Group,Contract Detention Facility (CDF),San Francisco
+Golden State Annex,611 Frontage Road,McFarland,CA,93250,661-792-2096,GEO Group,IGSA,San Francisco
+Yuba County Jail,215 5th Street,Marysville,CA,95901,530-749-5111,Yuba County,IGSA,San Francisco
+Stewart Detention Center,146 CCA Road,Lumpkin,GA,31815,229-838-5000,CoreCivic,IGSA,Atlanta
+Folkston ICE Processing Center,3026 Scrubby Bluff Road,Folkston,GA,31537,912-496-7500,GEO Group,IGSA,Atlanta
+Irwin County Detention Center,132 Cotton Drive,Ocilla,GA,31774,229-468-4121,LaSalle Corrections,IGSA,Atlanta
+Otero County Processing Center,26 McGregor Range Road,Chaparral,NM,88081,575-824-4352,Management & Training Corp,Contract Detention Facility (CDF),El Paso
+Cibola County Correctional Center,2000 Cibola Loop,Milan,NM,87021,505-285-6745,CoreCivic,IGSA,El Paso
+Torrance County Detention Facility,209 County Road A013,Estancia,NM,87016,505-384-9760,CoreCivic,IGSA,El Paso
+Krome North Service Processing Center,18201 SW 12th Street,Miami,FL,33194,305-207-2001,ICE,Service Processing Center (SPC),Miami
+Broward Transitional Center,3900 North Powerline Road,Pompano Beach,FL,33073,954-973-4000,GEO Group,Contract Detention Facility (CDF),Miami
+Glades County Detention Center,1297 East SR 78,Moore Haven,FL,33471,863-946-1600,Glades County,IGSA,Miami
+Baker County Detention Center,1 Sheriffs Office Drive,Macclenny,FL,32063,904-259-6960,Baker County,IGSA,Miami
+Wakulla County Jail,15 Oak Street,Crawfordville,FL,32327,850-745-7100,Wakulla County,IGSA,Miami
+Northwest ICE Processing Center,1623 East J Street,Tacoma,WA,98421,253-779-6000,GEO Group,Contract Detention Facility (CDF),Seattle
+Moshannon Valley Processing Center,555 Geo Drive,Philipsburg,PA,16866,814-378-1000,GEO Group,Contract Detention Facility (CDF),Philadelphia
+Clinton County Correctional Facility,58 Pine Mountain Road,McElhattan,PA,17748,570-769-7680,Clinton County,IGSA,Philadelphia
+Pike County Correctional Facility,175 Pike County Boulevard,Lords Valley,PA,18428,570-296-6111,Pike County,IGSA,Philadelphia
+York County Prison,3400 Concord Road,York,PA,17402,717-840-7580,York County,IGSA,Philadelphia
+Buffalo Federal Detention Facility,4250 Federal Drive,Batavia,NY,14020,585-343-6300,ICE,Service Processing Center (SPC),Buffalo
+Orange County Correctional Facility,110 Wells Farm Road,Goshen,NY,10924,845-291-2600,Orange County,IGSA,New York City
+Elizabeth Contract Detention Facility,625 Evans Street,Elizabeth,NJ,07201,908-352-3776,CoreCivic,Contract Detention Facility (CDF),Newark
+Bergen County Jail,160 South River Street,Hackensack,NJ,07601,201-336-3500,Bergen County,IGSA,Newark
+Essex County Correctional Facility,354 Doremus Avenue,Newark,NJ,07105,973-465-0254,Essex County,IGSA,Newark
+Hudson County Correctional Facility,30-35 Hackensack Avenue,Kearny,NJ,07032,201-395-5000,Hudson County,IGSA,Newark
+Plymouth County Correctional Facility,26 Long Pond Road,Plymouth,MA,02360,508-830-6200,Plymouth County,IGSA,Boston
+Strafford County Department of Corrections,266 County Farm Road,Dover,NH,03820,603-742-3310,Strafford County,IGSA,Boston
+Bristol County House of Correction,400 Faunce Corner Road,North Dartmouth,MA,02747,508-995-1311,Bristol County,IGSA,Boston
+Suffolk County House of Correction,20 Bradston Street,Boston,MA,02118,617-635-1100,Suffolk County,IGSA,Boston
+Etowah County Detention Center,827 Forrest Avenue,Gadsden,AL,35901,256-549-5377,Etowah County,IGSA,New Orleans
+Caroline Detention Facility,11093 Lewis B Puller Memorial Highway,Bowling Green,VA,22427,804-633-5841,Immigration Centers of America,IGSA,Washington
+Farmville Detention Center,508 Waterworks Road,Farmville,VA,23901,434-395-0317,Immigration Centers of America,IGSA,Washington
+Worcester County Detention Center,5022 Joyner Road,Snow Hill,MD,21863,410-632-1336,Worcester County,IGSA,Baltimore
+Howard County Detention Center,7301 Waterloo Road,Jessup,MD,20794,410-313-5200,Howard County,IGSA,Baltimore
+Boone County Jail,3020 Conrad Lane,Burlington,KY,41005,859-334-2117,Boone County,IGSA,Chicago
+Clay County Detention Center,609 East Jackson Street,Brazil,IN,47834,812-446-2535,Clay County,IGSA,Chicago
+Pulaski County Detention Center,1058 New Era Road,Ullin,IL,62992,618-845-3500,Pulaski County,IGSA,Chicago
+Kenosha County Detention Center,4777 88th Avenue,Kenosha,WI,53144,262-605-5100,Kenosha County,IGSA,Chicago
+Dodge Detention Facility,216 West Center Street,Juneau,WI,53039,920-386-3700,Dodge County,IGSA,Chicago
+McHenry County Adult Correctional Facility,2200 North Seminary Avenue,Woodstock,IL,60098,815-338-2144,McHenry County,IGSA,Chicago
+Calhoun County Correctional Facility,185 East Michigan Avenue,Battle Creek,MI,49014,269-781-0880,Calhoun County,IGSA,Detroit
+Chippewa County Correctional Facility,4498 West M-80,Sault Ste Marie,MI,49783,906-495-3312,Chippewa County,IGSA,Detroit
+Monroe County Dorm,7000 East Dunbar Road,Monroe,MI,48161,734-240-7700,Monroe County,IGSA,Detroit
+Geauga County Safety Center,12450 Merritt Road,Chardon,OH,44024,440-279-2000,Geauga County,IGSA,Detroit
+Morrow County Correctional Facility,101 Home Road,Mount Gilead,OH,43338,419-947-7741,Morrow County,IGSA,Detroit
+Seneca County Jail,3040 South State Route 100,Tiffin,OH,44883,419-447-3456,Seneca County,IGSA,Detroit
+Butler County Jail,705 Hanover Street,Hamilton,OH,45011,513-785-1300,Butler County,IGSA,Detroit
+Tri-County Detention Center,1026 Shawnee College Road,Ullin,IL,62992,618-845-3000,LaSalle Corrections,IGSA,Chicago
+Polk County Jail,1985 NE 51st Place,Des Moines,IA,50313,515-323-5400,Polk County,IGSA,St Paul
+Carver County Jail,606 East 4th Street,Chaska,MN,55318,952-361-1212,Carver County,IGSA,St Paul
+Freeborn County Adult Detention Center,411 South Broadway Avenue,Albert Lea,MN,56007,507-377-5260,Freeborn County,IGSA,St Paul
+Kandiyohi County Jail,2201 NE 23rd Street,Willmar,MN,56201,320-235-1260,Kandiyohi County,IGSA,St Paul
+Sherburne County Jail,13880 Business Center Drive NW,Elk River,MN,55330,763-765-3500,Sherburne County,IGSA,St Paul
+Hardin County Jail,1116 14th Avenue,Eldora,IA,50627,641-939-8189,Hardin County,IGSA,St Paul
+Linn County Correctional Center,53 3rd Avenue Bridge,Cedar Rapids,IA,52401,319-892-6100,Linn County,IGSA,St Paul
+Saline County Jail,251 North 10th Street,Salina,KS,67401,785-826-6500,Saline County,IGSA,Kansas City
+Chase County Detention Facility,201 East 11th Street,Imperial,NE,69033,308-882-7565,Chase County,IGSA,Kansas City
+Phelps County Jail,1115 Burlington Street,Holdrege,NE,68949,308-995-6531,Phelps County,IGSA,Kansas City
+Hall County Department of Corrections,121 South Pine Street,Grand Island,NE,68801,308-385-5200,Hall County,IGSA,Kansas City
+Henry County Justice Center,123 East Washington Street,Mount Pleasant,IA,52641,319-385-2712,Henry County,IGSA,St Paul
+Aurora ICE Processing Center,3130 North Oakland Street,Aurora,CO,80010,303-361-6612,GEO Group,Contract Detention Facility (CDF),Denver
+Teller County Detention Facility,288 West Highway 24,Cripple Creek,CO,80813,719-689-2244,Teller County,IGSA,Denver
+Garfield County Jail,107 8th Street,Glenwood Springs,CO,81601,970-945-0453,Garfield County,IGSA,Denver
+Park County Detention Center,1131 11th Street,Cody,WY,82414,307-527-8700,Park County,IGSA,Salt Lake City
+Cache County Jail,1225 West Valley View Avenue,Logan,UT,84321,435-755-1000,Cache County,IGSA,Salt Lake City
+Davis County Jail,800 West State Street,Farmington,UT,84025,801-451-4150,Davis County,IGSA,Salt Lake City
+Weber County Correctional Facility,1400 Depot Drive,Ogden,UT,84404,801-778-6700,Weber County,IGSA,Salt Lake City
+Henderson Detention Center,18 East Basic Road,Henderson,NV,89015,702-267-5000,Henderson Police,IGSA,Las Vegas
+Nye County Detention Center,1520 East Basin Avenue,Pahrump,NV,89060,775-751-7000,Nye County,IGSA,Las Vegas
+Northern Oregon Regional Correctional Facility,201 Webber Street,The Dalles,OR,97058,541-298-5136,NORCOR,IGSA,Seattle
+Yakima County Department of Corrections,111 North Front Street,Yakima,WA,98901,509-574-1800,Yakima County,IGSA,Seattle
+Honolulu Federal Detention Center,351 Elliott Street,Honolulu,HI,96819,808-838-4200,Bureau of Prisons,IGSA,Honolulu
+Anchorage Correctional Complex,1400 East 4th Avenue,Anchorage,AK,99501,907-269-4700,Alaska DOC,IGSA,Seattle
+Alexandria Staging Facility,830 Pine Hill Road,Alexandria,LA,71303,318-561-5550,GEO Group,Staging Facility,New Orleans
+Desert View Annex,10400 Rancho Road,Adelanto,CA,92301,760-561-6100,GEO Group,IGSA,Los Angeles

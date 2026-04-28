@@ -1,0 +1,104 @@
+court_name,street_address,suite,city,state,zip,phone,court_type
+Houston Immigration Court,600 Jefferson Street,Suite 800,Houston,TX,77002,713-718-1093,Non-detained
+Houston - Greenspoint Park Immigration Court,16800 Greenspoint Park Drive,Suite 400-S,Houston,TX,77060,832-553-5300,Non-detained
+Houston Service Processing Center Immigration Court,15850 Export Plaza Drive,,Houston,TX,77032,281-774-4925,Detained
+Conroe Immigration Court,806 Hilbig Road,,Conroe,TX,77301,936-538-8670,Detained
+Montgomery Immigration Court,806 Hilbig Road,,Conroe,TX,77301,936-538-8670,Detained
+San Antonio Immigration Court,800 Dolorosa Street,Suite 300,San Antonio,TX,78207,210-472-6637,Non-detained
+Pearsall Immigration Court,566 Veterans Drive,,Pearsall,TX,78061,830-334-8410,Detained
+Port Isabel Immigration Court,27991 Buena Vista Boulevard,,Los Fresnos,TX,78566,956-547-1820,Detained
+Harlingen Immigration Court,2009 West Jefferson Street,Suite 300,Harlingen,TX,78550,956-427-8580,Non-detained
+Laredo Immigration Court,1300 Matamoros Street,,Laredo,TX,78040,956-723-1183,Mixed
+Dilley Immigration Court,300 El Rancho Way,,Dilley,TX,78017,830-271-7550,Detained (Family)
+Karnes Immigration Court,409 FM 1144,,Karnes City,TX,78118,830-583-4700,Detained (Family)
+El Paso Immigration Court,700 East San Antonio Avenue,Suite B-410,El Paso,TX,79901,915-225-0700,Mixed
+El Paso Service Processing Center Immigration Court,8915 Montana Avenue,,El Paso,TX,79925,915-225-1928,Detained
+Dallas Immigration Court,1100 Commerce Street,Suite 404,Dallas,TX,75242,214-655-5050,Non-detained
+Fort Worth Immigration Adjudication Center,819 Taylor Street,Room 8A24,Fort Worth,TX,76102,817-385-2860,Adjudication Center
+Prairieland Immigration Court,1209 Sunflower Lane,,Alvarado,TX,76009,817-783-7700,Detained
+Atlanta Immigration Court,180 Spring Street SW,Suite 241,Atlanta,GA,30303,404-331-0907,Non-detained
+Stewart Immigration Court,146 CCA Road,,Lumpkin,GA,31815,229-838-7400,Detained
+Folkston Immigration Court,3026 Scrubby Bluff Road,,Folkston,GA,31537,912-496-7500,Detained
+Miami Immigration Court,333 South Miami Avenue,Suite 700,Miami,FL,33130,786-789-4900,Non-detained
+Miami Krome Immigration Court,18201 SW 12th Street,,Miami,FL,33194,305-207-2080,Detained
+Orlando Immigration Court,3535 Lawton Road,Suite 200,Orlando,FL,32803,407-237-3640,Non-detained
+Bradenton Immigration Court,1521 Manatee Avenue West,,Bradenton,FL,34205,941-741-3100,Non-detained
+Pompano Beach Immigration Court,3900 North Powerline Road,,Pompano Beach,FL,33073,954-973-4000,Detained
+New Orleans Immigration Court,1250 Poydras Street,Suite 800,New Orleans,LA,70113,504-503-3700,Non-detained
+Oakdale Immigration Court,1900 East Whatley Road,,Oakdale,LA,71463,318-215-7000,Detained
+Jena Immigration Court,830 Pine Hill Road,,Jena,LA,71342,318-992-7670,Detained
+Pine Prairie Immigration Court,1133 Hampton Dupre Road,,Pine Prairie,LA,70576,337-599-2700,Detained
+Phoenix Immigration Court,2035 North Central Avenue,,Phoenix,AZ,85004,602-379-5800,Non-detained
+Eloy Immigration Court,1705 East Hanna Road,,Eloy,AZ,85131,520-464-9244,Detained
+Florence Immigration Court,3260 North Pinal Parkway,,Florence,AZ,85132,520-868-3341,Detained
+Tucson Immigration Court,300 West Congress Street,Suite 200,Tucson,AZ,85701,520-205-1900,Mixed
+Los Angeles Immigration Court (Olive Street),606 South Olive Street,15th Floor,Los Angeles,CA,90014,213-534-4900,Non-detained
+Los Angeles Immigration Court (Van Nuys),15400 Sherman Way,Suite 300,Van Nuys,CA,91406,818-904-6446,Non-detained
+Los Angeles Immigration Court (North Los Angeles Street),300 North Los Angeles Street,Room 5400,Los Angeles,CA,90012,213-534-4900,Non-detained
+Los Angeles Immigration Court (West LA),11500 West Olympic Boulevard,Suite 600,Los Angeles,CA,90064,310-235-6021,Non-detained
+Adelanto Immigration Court,10250 Rancho Road,,Adelanto,CA,92301,760-561-6100,Detained
+San Diego Immigration Court,401 West A Street,Suite 800,San Diego,CA,92101,619-557-6052,Mixed
+Otay Mesa Immigration Court,7488 Calzada de la Fuente,,San Diego,CA,92154,619-671-9119,Detained
+Imperial Immigration Court,1572 Gateway Road,,Calexico,CA,92231,760-768-2400,Detained
+San Francisco Immigration Court,100 Montgomery Street,Suite 800,San Francisco,CA,94104,415-705-3375,Non-detained
+Sacramento Immigration Court,650 Capitol Mall,Suite 1-200,Sacramento,CA,95814,916-498-6480,Non-detained
+Mesa Verde Immigration Court,425 Golden State Avenue,,Bakersfield,CA,93301,661-322-4501,Detained
+San Pedro Immigration Court,2001 South Palos Verdes Street,,San Pedro,CA,90731,310-732-7770,Detained
+New York City Immigration Court (Federal Plaza),26 Federal Plaza,12th Floor,New York,NY,10278,212-264-1715,Non-detained
+New York City Immigration Court (Broadway),290 Broadway,Suite 1100,New York,NY,10007,212-264-1700,Non-detained
+New York City Immigration Court (Varick Street),201 Varick Street,Room 1140,New York,NY,10014,212-477-3411,Detained
+Buffalo Immigration Court,130 Delaware Avenue,Suite 200,Buffalo,NY,14202,716-849-6200,Non-detained
+Batavia Immigration Court,4250 Federal Drive,,Batavia,NY,14020,585-345-3950,Detained
+Ulster Immigration Court,750 Berme Road,,Napanoch,NY,12458,845-647-4490,Detained
+Newark Immigration Court,970 Broad Street,Suite 1200,Newark,NJ,07102,973-645-3260,Non-detained
+Elizabeth Immigration Court,625 Evans Street,,Elizabeth,NJ,07201,908-352-3776,Detained
+Boston Immigration Court,5 Post Office Square,8th Floor,Boston,MA,02109,617-565-3080,Non-detained
+Hartford Immigration Court,450 Main Street,4th Floor,Hartford,CT,06103,860-240-3868,Non-detained
+Philadelphia Immigration Court,900 Market Street,Suite 500,Philadelphia,PA,19107,215-925-0339,Non-detained
+Moshannon Valley Immigration Court,555 Geo Drive,,Philipsburg,PA,16866,814-378-1000,Detained
+York Immigration Court,3400 Concord Road,,York,PA,17402,717-852-4100,Detained
+Baltimore Immigration Court,31 Hopkins Plaza,Suite 1600,Baltimore,MD,21201,410-962-3092,Non-detained
+Hyattsville Immigration Court,6525 Belcrest Road,Suite 200,Hyattsville,MD,20782,301-779-1600,Non-detained
+Arlington Immigration Court,1901 South Bell Street,Suite 200,Arlington,VA,22202,703-603-1300,Non-detained
+Sterling Immigration Court,22685 Holiday Park Drive,Suite 240,Sterling,VA,20166,703-444-1300,Non-detained
+Annandale Immigration Court,7411 Boston Boulevard,,Springfield,VA,22153,703-440-9050,Non-detained
+Richmond Immigration Court,1010 East Main Street,Suite 600,Richmond,VA,23219,804-771-2440,Non-detained
+Falls Church Immigration Adjudication Center,5107 Leesburg Pike,,Falls Church,VA,22041,703-305-0289,Adjudication Center
+Caroline Immigration Court,11093 Lewis B Puller Memorial Highway,,Bowling Green,VA,22427,804-633-5841,Detained
+Farmville Immigration Court,508 Waterworks Road,,Farmville,VA,23901,434-395-0317,Detained
+Charlotte Immigration Court,5701 Executive Center Drive,Suite 300,Charlotte,NC,28212,704-817-5500,Non-detained
+Memphis Immigration Court,167 North Main Street,Suite 1100,Memphis,TN,38103,901-544-0260,Mixed
+Chicago Immigration Court,525 West Van Buren Street,Suite 500,Chicago,IL,60607,312-697-5800,Non-detained
+Broadview Immigration Court,1930 Beach Street,,Broadview,IL,60155,708-865-7500,Detained
+Detroit Immigration Court,333 Mt. Elliott Street,Suite 200,Detroit,MI,48207,313-226-2603,Non-detained
+Cleveland Immigration Court,1240 East 9th Street,Room 585,Cleveland,OH,44199,216-522-4830,Non-detained
+Kansas City Immigration Court,2345 Grand Boulevard,Suite 600,Kansas City,MO,64108,816-329-7700,Non-detained
+St. Louis Immigration Court,1222 Spruce Street,Room 1.107,St. Louis,MO,63103,314-552-6600,Non-detained
+Omaha Immigration Court,1717 Avenue H,Suite 100,Omaha,NE,68110,402-348-1100,Non-detained
+Bloomington Immigration Court,1 Federal Drive,Suite 1850,Fort Snelling,MN,55111,612-725-3801,Non-detained
+Fort Snelling Immigration Court,1 Federal Drive,Suite 1850,Fort Snelling,MN,55111,612-725-3801,Non-detained
+Salt Lake City Immigration Court,2975 South Decker Lake Drive,Suite 100,West Valley City,UT,84119,801-924-4900,Non-detained
+Denver Immigration Court,1961 Stout Street,Suite 1200,Denver,CO,80294,303-844-6212,Non-detained
+Aurora Immigration Court,3130 North Oakland Street,,Aurora,CO,80010,303-361-6612,Detained
+Las Vegas Immigration Court,3373 Pepper Lane,Suite 200,Las Vegas,NV,89120,702-868-5290,Non-detained
+Portland Immigration Court,1220 SW 3rd Avenue,Room 902,Portland,OR,97204,503-326-5651,Non-detained
+Seattle Immigration Court,1000 Second Avenue,Suite 2500,Seattle,WA,98104,206-553-5950,Non-detained
+Tacoma Immigration Court,1623 East J Street,,Tacoma,WA,98421,253-779-6020,Detained
+Honolulu Immigration Court,300 Ala Moana Boulevard,Room 8-156,Honolulu,HI,96850,808-541-1400,Non-detained
+Saipan Immigration Court,Horiguchi Building 2nd Floor Beach Road,,Garapan,MP,96950,670-664-1900,Non-detained
+San Juan Immigration Court,150 Carlos Chardon Avenue,Suite 360,San Juan,PR,00918,787-766-5365,Non-detained
+Guaynabo Immigration Court,Metro Office Park 7,Calle 1 Suite 102,Guaynabo,PR,00968,787-993-5500,Non-detained
+Las Cruces Immigration Court,505 South Main Street,Suite 460,Las Cruces,NM,88001,575-526-5077,Non-detained
+Otero Immigration Court,26 McGregor Range Road,,Chaparral,NM,88081,575-824-4352,Detained
+Cibola Immigration Court,2000 Cibola Loop,,Milan,NM,87021,505-285-6745,Detained
+Boise Immigration Court,1109 Main Street,Suite 300,Boise,ID,83702,208-559-2300,Non-detained
+Hyattsville-Annapolis Immigration Court,6525 Belcrest Road,Suite 200,Hyattsville,MD,20782,301-779-1600,Non-detained
+Concord Immigration Court,275 Chestnut Street,Suite 1700,Manchester,NH,03101,603-792-2700,Non-detained
+Louisville Immigration Court,601 West Broadway,Suite 320,Louisville,KY,40202,502-882-6440,Non-detained
+Memphis Detained Immigration Court,167 North Main Street,Suite 1100,Memphis,TN,38103,901-544-0260,Detained
+Nashville Immigration Court,1255 Lynnfield Road,Suite 168,Memphis,TN,38119,901-202-0950,Non-detained
+Fishkill Immigration Court,750 Berme Road,,Napanoch,NY,12458,845-647-4490,Detained
+Lasalle Immigration Court,830 Pine Hill Road,,Jena,LA,71342,318-992-7670,Detained
+San Francisco - Sansome Immigration Court,630 Sansome Street,Room 1010,San Francisco,CA,94111,415-705-3375,Non-detained
+San Antonio Annex Immigration Court,8940 Fourwinds Drive,Suite 200,San Antonio,TX,78239,210-967-7000,Non-detained
+Houston Annex Immigration Court,17171 Pine Forest Lane,,Houston,TX,77032,832-553-5300,Non-detained
