@@ -9,6 +9,7 @@ import {
   PageNumber,
   NumberFormat,
   UnderlineType,
+  BorderStyle,
 } from "docx";
 
 interface CaseData {
@@ -123,6 +124,21 @@ function emptyLine(): Paragraph {
   return new Paragraph({ spacing: { after: 100 }, children: [] });
 }
 
+const captionTabStop = { type: TabStopType.LEFT, position: 4680 };
+const bottomBorder = { style: BorderStyle.SINGLE, size: 6, space: 1, color: "000000" };
+
+function captionLine(left: string, right: string, leftRuns?: TextRun[]): Paragraph {
+  return new Paragraph({
+    spacing: { after: 0, line: 240 },
+    tabStops: [captionTabStop],
+    children: [
+      ...(leftRuns || [normal(left)]),
+      normal("\t"),
+      normal(right),
+    ],
+  });
+}
+
 export function generateHabeasDocument(data: CaseData): Document {
   const d = data;
   const reliefText = d.reliefType === "both"
@@ -159,140 +175,59 @@ export function generateHabeasDocument(data: CaseData): Document {
           centered(bold("UNITED STATES DISTRICT COURT")),
           centered(bold("FOR THE SOUTHERN DISTRICT OF TEXAS")),
           centered(bold("HOUSTON DIVISION")),
-          emptyLine(),
+          centered(bold(`CIVIL No. ${v(d.civilNo, "__________")}`)),
 
-          // Case caption with § dividers
+          // Horizontal line + caption with § dividers
           new Paragraph({
-            alignment: AlignmentType.LEFT,
-            spacing: { after: 0 },
-            tabStops: [
-              { type: TabStopType.LEFT, position: TabStopPosition.MAX / 2 },
-            ],
-            children: [
-              normal(`${v(d.petitionerName).toUpperCase()},`),
-              normal("\t"),
-              normal(`CIVIL No. ${v(d.civilNo, "__________")}`),
-            ],
+            spacing: { after: 0, line: 240 },
+            border: { bottom: bottomBorder },
+            tabStops: [captionTabStop],
+            children: [normal(""), normal("\t"), normal("\u00A7")],
+          }),
+          captionLine(`${v(d.petitionerName).toUpperCase()},`, "\u00A7"),
+          captionLine("", "\u00A7"),
+          captionLine("", "\u00A7", [italic("     Petitioner")]),
+          captionLine("", "\u00A7"),
+          new Paragraph({
+            spacing: { after: 0, line: 240 },
+            tabStops: [captionTabStop],
+            children: [normal(""), normal("\t"), normal("\u00A7   "), bold("PETITION FOR")],
           }),
           new Paragraph({
-            spacing: { after: 0 },
-            tabStops: [{ type: TabStopType.LEFT, position: TabStopPosition.MAX / 2 }],
-            children: [
-              normal(""),
-              normal("\t"),
-              normal("\u00A7"),
-            ],
+            spacing: { after: 0, line: 240 },
+            tabStops: [captionTabStop],
+            children: [normal("v."), normal("\t"), normal("\u00A7   "), bold("WRIT OF HABEAS CORPUS")],
           }),
           new Paragraph({
-            spacing: { after: 0 },
-            tabStops: [{ type: TabStopType.LEFT, position: TabStopPosition.MAX / 2 }],
-            children: [
-              normal(""),
-              normal("\t"),
-              normal("\u00A7"),
-            ],
+            spacing: { after: 0, line: 240 },
+            tabStops: [captionTabStop],
+            children: [normal(""), normal("\t"), normal("\u00A7   "), bold("PURSUANT TO 28 U.S.C \u00A72241")],
           }),
-          new Paragraph({
-            spacing: { after: 0 },
-            tabStops: [{ type: TabStopType.LEFT, position: TabStopPosition.MAX / 2 }],
-            children: [
-              italic("     Petitioner"),
-              normal("\t"),
-              normal("\u00A7"),
-            ],
-          }),
-          new Paragraph({
-            spacing: { after: 0 },
-            tabStops: [{ type: TabStopType.LEFT, position: TabStopPosition.MAX / 2 }],
-            children: [
-              normal(""),
-              normal("\t"),
-              normal("\u00A7"),
-            ],
-          }),
-          new Paragraph({
-            spacing: { after: 0 },
-            tabStops: [{ type: TabStopType.LEFT, position: TabStopPosition.MAX / 2 }],
-            children: [
-              normal(""),
-              normal("\t"),
-              normal("\u00A7   "),
-              bold("PETITION FOR"),
-            ],
-          }),
-          new Paragraph({
-            spacing: { after: 0 },
-            tabStops: [{ type: TabStopType.LEFT, position: TabStopPosition.MAX / 2 }],
-            children: [
-              normal("v."),
-              normal("\t"),
-              normal("\u00A7   "),
-              bold("WRIT OF HABEAS CORPUS"),
-            ],
-          }),
-          new Paragraph({
-            spacing: { after: 0 },
-            tabStops: [{ type: TabStopType.LEFT, position: TabStopPosition.MAX / 2 }],
-            children: [
-              normal(""),
-              normal("\t"),
-              normal("\u00A7   "),
-              bold("PURSUANT TO 28 U.S.C \u00A72241"),
-            ],
-          }),
-          emptyLine(),
 
-          // Respondents
+          // Respondents — every line has §
+          captionLine(`${v(d.wardenName).toUpperCase()}, in ${v(d.wardenTitle, "his")} official capacity`, "\u00A7"),
+          captionLine(`as ${v(d.wardenTitle, "Warden")} of the ${v(d.facilityName)}`, "\u00A7"),
+          captionLine("Detention Center;", "\u00A7"),
+          captionLine("", "\u00A7"),
+          captionLine("BRET BRADFORD, in his official capacity as", "\u00A7"),
+          captionLine("Field Office Director of ICE Enforcement and", "\u00A7"),
+          captionLine("Removal Operations Houston Field Office;", "\u00A7"),
+          captionLine("", "\u00A7"),
+          captionLine("MARKWAYNE MULLIN, in his official capacity", "\u00A7"),
+          captionLine("as Secretary of the Department of Homeland", "\u00A7"),
+          captionLine("Security;", "\u00A7"),
+          captionLine("", "\u00A7"),
+          captionLine("TODD BLANCHE, in his official capacity as", "\u00A7"),
+          captionLine("Acting Attorney General of the United States,", "\u00A7"),
+          captionLine("", "\u00A7"),
+          captionLine("", "\u00A7", [italic("     Respondents.")]),
+
+          // Horizontal line at bottom of caption
           new Paragraph({
-            spacing: { after: 60 },
-            children: [
-              normal(`${v(d.wardenName).toUpperCase()}, in ${v(d.wardenTitle, "his")} official capacity`),
-            ],
-          }),
-          new Paragraph({
-            spacing: { after: 60 },
-            children: [
-              normal(`as ${v(d.wardenTitle, "Warden")} of the ${v(d.facilityName)} Detention Center;`),
-            ],
-          }),
-          emptyLine(),
-          new Paragraph({
-            spacing: { after: 60 },
-            children: [normal("BRET BRADFORD, in his official capacity as")],
-          }),
-          new Paragraph({
-            spacing: { after: 60 },
-            children: [normal("Field Office Director of ICE Enforcement and")],
-          }),
-          new Paragraph({
-            spacing: { after: 60 },
-            children: [normal("Removal Operations Houston Field Office;")],
-          }),
-          emptyLine(),
-          new Paragraph({
-            spacing: { after: 60 },
-            children: [
-              normal("MARKWAYNE MULLIN, in his official capacity as Secretary of the Department of Homeland"),
-            ],
-          }),
-          new Paragraph({
-            spacing: { after: 60 },
-            children: [normal("Security;")],
-          }),
-          emptyLine(),
-          new Paragraph({
-            spacing: { after: 60 },
-            children: [normal("TODD BLANCHE, in his official capacity as")],
-          }),
-          new Paragraph({
-            spacing: { after: 60 },
-            children: [normal("Acting Attorney General of the United States,")],
-          }),
-          emptyLine(),
-          new Paragraph({
-            spacing: { after: 200 },
-            indent: { firstLine: 720 },
-            children: [italic("Respondents.")],
+            spacing: { after: 200, line: 240 },
+            border: { bottom: bottomBorder },
+            tabStops: [captionTabStop],
+            children: [normal(""), normal("\t"), normal("\u00A7")],
           }),
 
           // Title
