@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import SignOutButton from "@/components/SignOutButton";
 
 interface CaseRecord {
   _id: string;
@@ -59,12 +60,15 @@ export default function Dashboard() {
               Manuel E. Solis - Attorney for Petitioner
             </p>
           </div>
-          <Link
-            href="/cases/new"
-            className="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
-          >
-            + New Petition
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/cases/new"
+              className="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+            >
+              + New Petition
+            </Link>
+            <SignOutButton />
+          </div>
         </div>
       </header>
 

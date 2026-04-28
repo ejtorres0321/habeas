@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Case from "@/models/Case";
+import { auth } from "@/auth";
+
+const unauthorized = () => NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!(await auth())) return unauthorized();
   await connectToDatabase();
   const { id } = await params;
 
@@ -20,6 +24,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!(await auth())) return unauthorized();
   await connectToDatabase();
   const { id } = await params;
 
@@ -35,6 +40,7 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!(await auth())) return unauthorized();
   await connectToDatabase();
   const { id } = await params;
 

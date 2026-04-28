@@ -3,11 +3,13 @@ import { connectToDatabase } from "@/lib/mongodb";
 import Case from "@/models/Case";
 import { generateHabeasDocument } from "@/lib/generateDocument";
 import { Packer } from "docx";
+import { auth } from "@/auth";
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!(await auth())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   await connectToDatabase();
   const { id } = await params;
 
