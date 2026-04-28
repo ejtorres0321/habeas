@@ -98,27 +98,16 @@ export default function CaseForm({ initialData, caseId }: CaseFormProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    // no-op — form submission is handled by Save & Review button
+  }
+
+  async function handleSaveAndReview() {
     setSaving(true);
     setError("");
 
     try {
       const id = await saveCase(formData);
       setPendingNavigate(`/cases/${id}/preview`);
-      triggerAiReview(formData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleSaveDraft() {
-    setSaving(true);
-    setError("");
-
-    try {
-      await saveCase({ ...formData, status: "draft" });
-      setPendingNavigate("/");
       triggerAiReview(formData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
@@ -245,18 +234,11 @@ export default function CaseForm({ initialData, caseId }: CaseFormProps) {
           </button>
           <button
             type="button"
-            onClick={handleSaveDraft}
-            disabled={saving}
-            className="px-5 py-2.5 text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
-          >
-            {saving ? "Saving..." : "Save Draft"}
-          </button>
-          <button
-            type="submit"
+            onClick={handleSaveAndReview}
             disabled={saving}
             className="px-5 py-2.5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
-            {saving ? "Saving..." : "Save & Preview"}
+            {saving ? "Saving..." : "Save & Review"}
           </button>
         </div>
       </form>
@@ -269,7 +251,7 @@ export default function CaseForm({ initialData, caseId }: CaseFormProps) {
             onAccept={handleAcceptSuggestion}
             onClose={() => setShowAiPanel(false)}
             onContinue={pendingNavigate ? handleContinue : undefined}
-            continueLabel={pendingNavigate === "/" ? "Back to Cases" : "Continue to Preview"}
+            continueLabel="Save & Preview"
           />
         </div>
       )}
