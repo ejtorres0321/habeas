@@ -119,37 +119,47 @@ export default function PreviewPage() {
       <div className="max-w-4xl mx-auto my-8">
         <div className="bg-white shadow-lg rounded-lg p-16 font-serif text-sm leading-relaxed" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
           {/* Caption */}
-          <div className="text-center mb-6">
+          <div className="text-center mb-4">
             <p className="font-bold">UNITED STATES DISTRICT COURT</p>
             <p className="font-bold">FOR THE SOUTHERN DISTRICT OF TEXAS</p>
             <p className="font-bold">HOUSTON DIVISION</p>
+            <p className="font-bold">CIVIL No. {v(data.civilNo, "__________")}</p>
           </div>
 
-          {/* Case Header */}
-          <div className="flex mb-6 border-b pb-6">
-            <div className="w-1/2">
-              <p className="font-bold">{v(data.petitionerName).toUpperCase()},</p>
-              <p className="italic ml-4">Petitioner</p>
-              <p className="mt-4">v.</p>
-              <p className="mt-4">
-                {v(data.wardenName).toUpperCase()}, in {v(data.wardenTitle, "his")} official capacity
-              </p>
-              <p>as Warden of the {v(data.facilityName)} Detention Center;</p>
-              <p className="mt-2">BRET BRADFORD, in his official capacity as</p>
-              <p>Field Office Director of ICE Enforcement and</p>
-              <p>Removal Operations Houston Field Office;</p>
-              <p className="mt-2">MARKWAYNE MULLIN, in his official capacity as</p>
-              <p>Secretary of the Department of Homeland Security;</p>
-              <p className="mt-2">TODD BLANCHE, in his official capacity as</p>
-              <p>Acting Attorney General of the United States,</p>
-              <p className="italic ml-4 mt-2">Respondents.</p>
-            </div>
-            <div className="w-1/2 text-right">
-              <p>CIVIL No. {v(data.civilNo, "__________")}</p>
-              <p className="font-bold mt-8">PETITION FOR</p>
-              <p className="font-bold">WRIT OF HABEAS CORPUS</p>
-              <p className="font-bold">PURSUANT TO 28 U.S.C &sect;2241</p>
-            </div>
+          {/* Case Header with § dividers */}
+          <div className="border-t border-b border-black py-2 mb-6">
+            <table className="w-full" style={{ tableLayout: "fixed" }}>
+              <colgroup>
+                <col style={{ width: "55%" }} />
+                <col style={{ width: "3%" }} />
+                <col style={{ width: "42%" }} />
+              </colgroup>
+              <tbody>
+                <tr><td>{v(data.petitionerName).toUpperCase()},</td><td>&sect;</td><td></td></tr>
+                <tr><td></td><td>&sect;</td><td></td></tr>
+                <tr><td className="italic pl-4">Petitioner</td><td>&sect;</td><td></td></tr>
+                <tr><td></td><td>&sect;</td><td></td></tr>
+                <tr><td></td><td>&sect;</td><td className="font-bold">PETITION FOR</td></tr>
+                <tr><td>v.</td><td>&sect;</td><td className="font-bold">WRIT OF HABEAS CORPUS</td></tr>
+                <tr><td></td><td>&sect;</td><td className="font-bold">PURSUANT TO 28 U.S.C &sect;2241</td></tr>
+                <tr><td>{v(data.wardenName).toUpperCase()}, in {v(data.wardenTitle, "his")} official capacity</td><td>&sect;</td><td></td></tr>
+                <tr><td>as {v(data.wardenTitle, "Warden")} of the {v(data.facilityName)}</td><td>&sect;</td><td></td></tr>
+                <tr><td>Detention Center;</td><td>&sect;</td><td></td></tr>
+                <tr><td></td><td>&sect;</td><td></td></tr>
+                <tr><td>BRET BRADFORD, in his official capacity as</td><td>&sect;</td><td></td></tr>
+                <tr><td>Field Office Director of ICE Enforcement and</td><td>&sect;</td><td></td></tr>
+                <tr><td>Removal Operations Houston Field Office;</td><td>&sect;</td><td></td></tr>
+                <tr><td></td><td>&sect;</td><td></td></tr>
+                <tr><td>MARKWAYNE MULLIN, in his official capacity</td><td>&sect;</td><td></td></tr>
+                <tr><td>as Secretary of the Department of Homeland</td><td>&sect;</td><td></td></tr>
+                <tr><td>Security;</td><td>&sect;</td><td></td></tr>
+                <tr><td></td><td>&sect;</td><td></td></tr>
+                <tr><td>TODD BLANCHE, in his official capacity as</td><td>&sect;</td><td></td></tr>
+                <tr><td>Acting Attorney General of the United States,</td><td>&sect;</td><td></td></tr>
+                <tr><td></td><td>&sect;</td><td></td></tr>
+                <tr><td className="italic pl-4">Respondents.</td><td>&sect;</td><td></td></tr>
+              </tbody>
+            </table>
           </div>
 
           {/* Title */}
