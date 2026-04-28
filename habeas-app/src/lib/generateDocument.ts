@@ -103,11 +103,15 @@ function subPara(letter: string, ...runs: TextRun[]): Paragraph {
   });
 }
 
+function boldUnderline(text: string): TextRun {
+  return new TextRun({ text, bold: true, underline: { type: UnderlineType.SINGLE }, font: "Times New Roman", size: 24 });
+}
+
 function sectionTitle(text: string): Paragraph {
   return new Paragraph({
     alignment: AlignmentType.CENTER,
     spacing: { before: 400, after: 200 },
-    children: [bold(text)],
+    children: [boldUnderline(text)],
   });
 }
 

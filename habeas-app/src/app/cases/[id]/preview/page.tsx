@@ -169,7 +169,7 @@ export default function PreviewPage() {
           </div>
 
           {/* I. INTRODUCTION */}
-          <h2 className="text-center font-bold mt-8 mb-4">I. INTRODUCTION</h2>
+          <h2 className="text-center font-bold underline mt-8 mb-4">I. INTRODUCTION</h2>
 
           <p className="text-justify indent-8 mb-4">
             Petitioner has been detained by Immigration and Customs Enforcement (ICE) for {v(data.monthsDetained)} months without any individualized determination that he presents a flight risk or danger to the community. He seeks immediate release or, at minimum, a hearing before a neutral decision-maker. Petitioner lived in the United States for {v(data.yearsInUS)} years without ever being apprehended, detained, or placed in removal proceedings. During that time, he maintained stable employment and residence, built deep family ties in the United States, and had zero criminal arrests, charges, or convictions.
@@ -184,14 +184,14 @@ export default function PreviewPage() {
           </p>
 
           {/* II. JURISDICTION */}
-          <h2 className="text-center font-bold mt-8 mb-4">II. JURISDICTION AND AUTHORITY</h2>
+          <h2 className="text-center font-bold underline mt-8 mb-4">II. JURISDICTION AND AUTHORITY</h2>
 
           <p className="indent-8 mb-3">1. Jurisdiction lies under 28 U.S.C. &sect;2241 and 28 U.S.C. &sect;1331.</p>
           <p className="indent-8 mb-3">2. The Fifth Circuit recognizes habeas jurisdiction over challenges to the fact and legality of immigration detention. See <em>Zadvydas v. Davis</em>, 533 U.S. 678 (2001).</p>
           <p className="indent-8 mb-3">3. This Court has authority to issue a TRO to halt ongoing constitutional violations.</p>
 
           {/* III. STATEMENT OF FACTS */}
-          <h2 className="text-center font-bold mt-8 mb-4">III. STATEMENT OF FACTS</h2>
+          <h2 className="text-center font-bold underline mt-8 mb-4">III. STATEMENT OF FACTS</h2>
           <h3 className="font-bold ml-8 mb-3">1. Background and Family Ties</h3>
 
           <p className="indent-8 mb-3">4. Petitioner is {v(data.petitionerAge)} years old and has resided in the United States for {v(data.yearsInUS)} years, since {v(data.yearOfEntry)}.</p>
@@ -218,7 +218,7 @@ export default function PreviewPage() {
           <p className="indent-8 mb-3">19. <strong>Familial Harm:</strong> {v(data.familialHarm, "Separation from spouse and children.")}</p>
 
           {/* IV. CLAIM FOR RELIEF */}
-          <h2 className="text-center font-bold mt-8 mb-4">IV. CLAIM FOR RELIEF</h2>
+          <h2 className="text-center font-bold underline mt-8 mb-4">IV. CLAIM FOR RELIEF</h2>
           <p className="text-center underline font-bold mb-4">VIOLATION OF FIFTH AMENDMENT DUE PROCESS</p>
 
           <p className="indent-8 mb-3">34. Petitioner incorporates all preceding paragraphs.</p>
@@ -228,7 +228,7 @@ export default function PreviewPage() {
           <p className="text-center text-gray-400 my-8">[ ... Full document continues with all legal arguments ... ]</p>
 
           {/* V. PRAYER FOR RELIEF */}
-          <h2 className="text-center font-bold mt-8 mb-4">V. PRAYER FOR RELIEF</h2>
+          <h2 className="text-center font-bold underline mt-8 mb-4">V. PRAYER FOR RELIEF</h2>
 
           <p className="indent-8 mb-3 text-justify">
             <strong>WHEREFORE</strong>, Petitioner respectfully requests that this Court:
