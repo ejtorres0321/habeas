@@ -154,7 +154,7 @@ export function generateHabeasDocument(data: CaseData): Document {
           centered(bold("HOUSTON DIVISION")),
           emptyLine(),
 
-          // Case caption with tabs
+          // Case caption with § dividers
           new Paragraph({
             alignment: AlignmentType.LEFT,
             spacing: { after: 0 },
@@ -169,17 +169,11 @@ export function generateHabeasDocument(data: CaseData): Document {
           }),
           new Paragraph({
             spacing: { after: 0 },
-            indent: { firstLine: 720 },
-            children: [italic("Petitioner")],
-          }),
-          emptyLine(),
-          new Paragraph({
-            spacing: { after: 0 },
             tabStops: [{ type: TabStopType.LEFT, position: TabStopPosition.MAX / 2 }],
             children: [
-              normal("v."),
+              normal(""),
               normal("\t"),
-              bold("PETITION FOR"),
+              normal("\u00A7"),
             ],
           }),
           new Paragraph({
@@ -188,6 +182,44 @@ export function generateHabeasDocument(data: CaseData): Document {
             children: [
               normal(""),
               normal("\t"),
+              normal("\u00A7"),
+            ],
+          }),
+          new Paragraph({
+            spacing: { after: 0 },
+            tabStops: [{ type: TabStopType.LEFT, position: TabStopPosition.MAX / 2 }],
+            children: [
+              italic("     Petitioner"),
+              normal("\t"),
+              normal("\u00A7"),
+            ],
+          }),
+          new Paragraph({
+            spacing: { after: 0 },
+            tabStops: [{ type: TabStopType.LEFT, position: TabStopPosition.MAX / 2 }],
+            children: [
+              normal(""),
+              normal("\t"),
+              normal("\u00A7"),
+            ],
+          }),
+          new Paragraph({
+            spacing: { after: 0 },
+            tabStops: [{ type: TabStopType.LEFT, position: TabStopPosition.MAX / 2 }],
+            children: [
+              normal(""),
+              normal("\t"),
+              normal("\u00A7   "),
+              bold("PETITION FOR"),
+            ],
+          }),
+          new Paragraph({
+            spacing: { after: 0 },
+            tabStops: [{ type: TabStopType.LEFT, position: TabStopPosition.MAX / 2 }],
+            children: [
+              normal("v."),
+              normal("\t"),
+              normal("\u00A7   "),
               bold("WRIT OF HABEAS CORPUS"),
             ],
           }),
@@ -197,6 +229,7 @@ export function generateHabeasDocument(data: CaseData): Document {
             children: [
               normal(""),
               normal("\t"),
+              normal("\u00A7   "),
               bold("PURSUANT TO 28 U.S.C \u00A72241"),
             ],
           }),
