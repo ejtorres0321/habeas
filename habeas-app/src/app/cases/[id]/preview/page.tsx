@@ -85,7 +85,6 @@ export default function PreviewPage() {
   const [data, setData] = useState<CaseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
-  const [exportingPdf, setExportingPdf] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saved">("idle");
   const [activeSection, setActiveSection] = useState("caption");
@@ -215,69 +214,7 @@ export default function PreviewPage() {
   }
 
   function handleExportPdf() {
-    const docEl = documentTextRef.current;
-    if (!docEl) return;
-    setExportingPdf(true);
-
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      setExportingPdf(false);
-      return;
-    }
-
-    const title = data?.petitionerName
-      ? `Habeas Corpus - ${data.petitionerName}`
-      : "Habeas Corpus Petition";
-
-    printWindow.document.write(`<!DOCTYPE html>
-<html>
-<head>
-  <title>${title}</title>
-  <style>
-    @page {
-      size: letter;
-      margin: 1in;
-    }
-    body {
-      font-family: 'Times New Roman', Times, serif;
-      font-size: 12pt;
-      line-height: 1.5;
-      color: #000;
-      margin: 0;
-      padding: 0;
-    }
-    table { border-collapse: collapse; width: 100%; }
-    td { vertical-align: top; padding: 1px 0; }
-    .font-bold, strong { font-weight: bold; }
-    .italic, em { font-style: italic; }
-    .text-center { text-align: center; }
-    .text-justify { text-align: justify; }
-    .underline { text-decoration: underline; }
-    .indent-8 { text-indent: 0.5in; }
-    .ml-12 { margin-left: 0.75in; }
-    .ml-8 { margin-left: 0.5in; }
-    .ml-64 { margin-left: 3in; }
-    .border-t { border-top: 1px solid #000; }
-    .border-b { border-bottom: 1px solid #000; }
-    h2, h3 { page-break-after: avoid; }
-    p { margin-bottom: 6pt; }
-  </style>
-</head>
-<body>${docEl.innerHTML}</body>
-</html>`);
-    printWindow.document.close();
-
-    printWindow.onafterprint = () => {
-      printWindow.close();
-      setExportingPdf(false);
-    };
-
-    // Delay to let styles render
-    setTimeout(() => {
-      printWindow.print();
-      // Fallback in case onafterprint doesn't fire
-      setTimeout(() => setExportingPdf(false), 1000);
-    }, 250);
+    window.print();
   }
 
   async function handleSave() {
@@ -321,9 +258,57 @@ export default function PreviewPage() {
   const p = () => String(++pn);
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
+    <div data-print-root className="h-screen flex flex-col bg-gray-100">
+      {/* Print styles */}
+      <style>{`
+        @media print {
+          @page { size: letter; margin: 1in; }
+          html, body {
+            background: white !important;
+            height: auto !important;
+            overflow: visible !important;
+          }
+          /* Hide non-document elements */
+          [data-print-hide] {
+            display: none !important;
+          }
+          /* Fix layout: remove flex/overflow constraints */
+          [data-print-root] {
+            display: block !important;
+            height: auto !important;
+            background: white !important;
+          }
+          [data-print-layout] {
+            display: block !important;
+            overflow: visible !important;
+            height: auto !important;
+          }
+          [data-print-scroll] {
+            overflow: visible !important;
+            height: auto !important;
+            padding: 0 !important;
+          }
+          /* Clean up document container */
+          [data-print-document] {
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            background: white !important;
+            outline: none !important;
+          }
+          [data-print-document], [data-print-document] * {
+            font-family: 'Times New Roman', Times, serif !important;
+            color: #000 !important;
+          }
+          /* Typography */
+          p { widows: 2; orphans: 2; }
+          h2, h3, h4 { page-break-after: avoid; }
+        }
+      `}</style>
       {/* Toolbar */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 shadow-sm z-10">
+      <div data-print-hide className="flex-shrink-0 bg-white border-b border-gray-200 shadow-sm z-10">
         <div className="px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/" className="text-sm text-blue-600 hover:text-blue-800">
@@ -364,10 +349,9 @@ export default function PreviewPage() {
             </button>
             <button
               onClick={handleExportPdf}
-              disabled={exportingPdf}
-              className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50"
+              className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
             >
-              {exportingPdf ? "Exporting..." : "Export PDF"}
+              Export PDF
             </button>
             <button
               onClick={handleDownload}
@@ -381,9 +365,9 @@ export default function PreviewPage() {
       </div>
 
       {/* Main layout: sidebar + document */}
-      <div className="flex flex-1 overflow-hidden">
+      <div data-print-layout className="flex flex-1 overflow-hidden">
         {/* Left sidebar - section navigation */}
-        <nav className="w-64 flex-shrink-0 bg-white border-r border-gray-200 overflow-y-auto py-4">
+        <nav data-print-hide className="w-64 flex-shrink-0 bg-white border-r border-gray-200 overflow-y-auto py-4">
           <h3 className="px-4 pb-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
             Document Sections
           </h3>
@@ -408,11 +392,12 @@ export default function PreviewPage() {
         </nav>
 
         {/* Document content */}
-        <div ref={contentRef} className="flex-1 overflow-y-auto py-8 px-4">
+        <div ref={contentRef} data-print-scroll className="flex-1 overflow-y-auto py-8 px-4">
           <div
             ref={documentTextRef}
             contentEditable
             suppressContentEditableWarning
+            data-print-document
             className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-16 font-serif text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2"
             style={{ fontFamily: "'Times New Roman', Times, serif" }}
           >
@@ -752,7 +737,7 @@ export default function PreviewPage() {
 
         {/* AI Review Panel */}
         {showAiPanel && (
-          <div className="w-96 flex-shrink-0 border-l border-gray-200">
+          <div data-print-hide className="w-96 flex-shrink-0 border-l border-gray-200">
             <DocumentAIPanel
               documentText={documentText}
               caseData={data as unknown as Record<string, string>}
