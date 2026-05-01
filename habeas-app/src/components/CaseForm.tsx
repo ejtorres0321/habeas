@@ -154,7 +154,11 @@ export default function CaseForm({ initialData, caseId }: CaseFormProps) {
               <h2 className="text-lg font-semibold text-gray-800">{section.title}</h2>
             </div>
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
-              {section.fields.map((field) => (
+              {section.fields.map((field) => {
+                if (field.visibleWhen && formData[field.visibleWhen.field] !== field.visibleWhen.value) {
+                  return null;
+                }
+                return (
                 <div
                   key={field.key}
                   className={field.type === "textarea" ? "md:col-span-2" : ""}
@@ -219,7 +223,8 @@ export default function CaseForm({ initialData, caseId }: CaseFormProps) {
                     </>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ))}

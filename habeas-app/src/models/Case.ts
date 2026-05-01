@@ -41,6 +41,10 @@ export interface ICase extends Document {
   economicHarm: string;
   familialHarm: string;
 
+  // Criminal History
+  hasCriminalHistory: string;
+  criminalHistoryDetails: string;
+
   // Employment
   employmentDetails: string;
   yearsAtResidence: string;
@@ -96,6 +100,9 @@ const CaseSchema = new Schema<ICase>(
 
     economicHarm: { type: String, default: "" },
     familialHarm: { type: String, default: "" },
+
+    hasCriminalHistory: { type: String, default: "no" },
+    criminalHistoryDetails: { type: String, default: "" },
 
     employmentDetails: { type: String, default: "" },
     yearsAtResidence: { type: String, default: "" },

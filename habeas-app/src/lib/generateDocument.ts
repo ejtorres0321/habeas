@@ -44,6 +44,8 @@ interface CaseData {
   usCitizenFamilyMembers: string;
   economicHarm: string;
   familialHarm: string;
+  hasCriminalHistory: string;
+  criminalHistoryDetails: string;
   employmentDetails: string;
   yearsAtResidence: string;
   serviceDateWarden: string;
@@ -170,9 +172,448 @@ function captionRow(leftRuns: TextRun[], rightRuns: TextRun[]): TableRow {
 
 export function generateHabeasDocument(data: CaseData): Document {
   const d = data;
+  const hasCriminal = d.hasCriminalHistory === "yes";
+  let pn = 0;
+  const p = () => String(++pn);
+
   const reliefText = d.reliefType === "both"
     ? "asylum / cancellation of removal under 8 U.S.C. \u00A71229b(b)"
     : v(d.reliefType, "asylum / cancellation of removal under 8 U.S.C. \u00A71229b(b)");
+
+  // --- Build document children dynamically ---
+
+  const children: (Paragraph | Table)[] = [
+    // CAPTION
+    centered(bold("UNITED STATES DISTRICT COURT")),
+    centered(bold("FOR THE SOUTHERN DISTRICT OF TEXAS")),
+    centered(bold("HOUSTON DIVISION")),
+    centered(bold(`CIVIL No. ${v(d.civilNo, "__________")}`)),
+
+    // Horizontal line above caption
+    new Paragraph({
+      spacing: { after: 0 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, space: 1, color: "000000" } },
+      children: [],
+    }),
+
+    // Case caption table with § dividers
+    new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: noBorders,
+      rows: [
+        captionRow([normal(`${v(d.petitionerName).toUpperCase()},`)], []),
+        captionRow([], []),
+        captionRow([italic("     Petitioner")], []),
+        captionRow([], []),
+        captionRow([], [bold("PETITION FOR")]),
+        captionRow([normal("v.")], [bold("WRIT OF HABEAS CORPUS")]),
+        captionRow([], [bold("PURSUANT TO 28 U.S.C \u00A72241")]),
+        captionRow([normal(`${v(d.wardenName).toUpperCase()}, in ${v(d.wardenTitle, "his")} official capacity`)], []),
+        captionRow([normal(`as ${v(d.wardenTitle, "Warden")} of the ${v(d.facilityName)} Detention Center;`)], []),
+        captionRow([], []),
+        captionRow([normal(`${v(d.fieldOfficeDirector, "BRET BRADFORD").toUpperCase()}, in his official capacity as`)], []),
+        captionRow([normal("Field Office Director of ICE Enforcement and")], []),
+        captionRow([normal(`Removal Operations ${v(d.eroFieldOffice, "Houston Field Office")};`)], []),
+        captionRow([], []),
+        captionRow([normal("MARKWAYNE MULLIN, in his official capacity as")], []),
+        captionRow([normal("Secretary of the Department of Homeland Security;")], []),
+        captionRow([], []),
+        captionRow([normal("TODD BLANCHE, in his official capacity as")], []),
+        captionRow([normal("Acting Attorney General of the United States,")], []),
+        captionRow([], []),
+        captionRow([italic("     Respondents.")], []),
+      ],
+    }),
+
+    // Horizontal line below caption
+    new Paragraph({
+      spacing: { after: 200 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, space: 1, color: "000000" } },
+      children: [],
+    }),
+
+    // Title
+    centered(bold("PETITION FOR WRIT OF HABEAS CORPUS PURSUANT TO 28 U.S.C. \u00A72241")),
+    centered(bold("AND COMPLAINT FOR DECLARATORY AND INJUNCTIVE RELIEF")),
+    emptyLine(),
+
+    // I. INTRODUCTION
+    sectionTitle("I. INTRODUCTION"),
+
+    justified(
+      normal(hasCriminal
+        ? `Petitioner has been detained by Immigration and Customs Enforcement (ICE) for ${v(d.monthsDetained)} months without any individualized determination that he presents a flight risk or danger to the community. He seeks immediate release or, at minimum, a hearing before a neutral decision-maker. Petitioner lived in the United States for ${v(d.yearsInUS)} years without ever being apprehended, detained, or placed in removal proceedings. During that time, he maintained stable employment and residence and built deep family ties in the United States. He was detained solely due to a change in government policy, with no change in his individual circumstances.`
+        : `Petitioner has been detained by Immigration and Customs Enforcement (ICE) for ${v(d.monthsDetained)} months without any individualized determination that he presents a flight risk or danger to the community. He seeks immediate release or, at minimum, a hearing before a neutral decision-maker. Petitioner lived in the United States for ${v(d.yearsInUS)} years without ever being apprehended, detained, or placed in removal proceedings. During that time, he maintained stable employment and residence, built deep family ties in the United States, and had zero criminal arrests, charges, or convictions. He was detained solely due to a change in government policy, with no change in his individual circumstances.`)
+    ),
+
+    justified(
+      normal(`This case does not challenge the Fifth Circuit\u2019s recent decision in `),
+      italic("Buenrostro-Mendez v. Bondi"),
+      normal(`, No. 25-20496 (5th Cir. Feb. 6, 2026), which held that certain noncitizens are subject to mandatory detention under 8 U.S.C. \u00A71225(b)(2)(A). Rather, it challenges the constitutional application of that statute to Petitioner\u2019s specific circumstances.`)
+    ),
+
+    justified(
+      normal(`The Fifth Circuit recognized that constitutional questions about prolonged detention under \u00A71225(b)(2)(A) were \u201Cwholly speculative\u201D at the time of its decision. `),
+      italic("Buenrostro-Mendez"),
+      normal(hasCriminal
+        ? `, slip op. at 21. Petitioner\u2019s ${v(d.monthsDetained)}-month detention, following ${v(d.yearsInUS)} years of residence in the United States with only ${v(d.criminalHistoryDetails, "a minor criminal citation")} which is not a violent crime or subject to moral turpitude, makes these concerns concrete. The Constitution does not permit indefinite detention without individualized review, regardless of statutory classification.`
+        : `, slip op. at 21. Petitioner\u2019s ${v(d.monthsDetained)}-month detention, following ${v(d.yearsInUS)} years of law-abiding residence in the United States without a single criminal violation or immigration infraction, makes these concerns concrete. The Constitution does not permit indefinite detention without individualized review, regardless of statutory classification.`)
+    ),
+
+    // II. JURISDICTION
+    sectionTitle("II. JURISDICTION AND AUTHORITY"),
+
+    numberedPara(p(), normal("Jurisdiction lies under 28 U.S.C. \u00A72241 and 28 U.S.C. \u00A71331.")),
+
+    numberedPara(p(), normal("The Fifth Circuit recognizes habeas jurisdiction over challenges to the fact and legality of immigration detention, including constitutional claims. See "),
+      italic("Zadvydas v. Davis"),
+      normal(", 533 U.S. 678 (2001); "),
+      italic("Pierre v. United States"),
+      normal(", 525 F.2d 933 (5th Cir. 1976).")
+    ),
+
+    numberedPara(p(), normal("This Court has authority to issue a TRO to halt ongoing constitutional violations. See "),
+      italic("Opulent Life Church v. City of Holly Springs"),
+      normal(", 697 F.3d 279, 295 (5th Cir. 2012).")
+    ),
+
+    // III. STATEMENT OF FACTS
+    sectionTitle("III. STATEMENT OF FACTS"),
+    subSectionTitle("1. Background and Family Ties"),
+
+    numberedPara(p(), normal(`Petitioner is ${v(d.petitionerAge)} years old and has resided in the United States for ${v(d.yearsInUS)} years, since ${v(d.yearOfEntry)}. See attached Exhibit A.`)),
+
+    numberedPara(p(), normal(`Petitioner and his family live at ${v(d.petitionerAddress)}.`)),
+
+    numberedPara(p(), normal(hasCriminal
+      ? `Petitioner has ${v(d.criminalHistoryDetails, "a minor criminal citation")} and no history of immigration violations other than unlawful entry in ${v(d.yearOfEntry)}.`
+      : `Petitioner has no criminal record and no history of immigration violations other than unlawful entry in ${v(d.yearOfEntry)}.`)),
+
+    numberedPara(p(), normal(`Prior to his detention on ${formatDate(d.detentionDate)}, Petitioner had never been apprehended, detained, or placed in removal proceedings by any immigration authority. He lived openly in the United States and had no prior ICE contact of any kind.`)),
+
+    subSectionTitle("2. Detention Under \u00A71225(b)(2)(A)"),
+
+    numberedPara(p(), normal(`On ${formatDate(d.detentionDate)}, ICE apprehended Petitioner during ${v(d.apprehensionCircumstance)} and took him into custody.`)),
+
+    numberedPara(p(), normal(`ICE asserts authority to detain Petitioner under 8 U.S.C. \u00A71225(b)(2)(A), claiming he is an \u201Capplicant for admission\u201D subject to mandatory detention based on his manner of entry ${v(d.yearsInUS)} years ago.`)),
+
+    numberedPara(p(), normal("ICE has provided no explanation for its decision to detain Petitioner, other than changed \u201Cpolicy\u201D following the Fifth Circuit\u2019s decision in "),
+      italic("Buenrostro-Mendez v. Bondi"),
+      normal(", No. 25-20496 (5th Cir. Feb. 6, 2026).")
+    ),
+
+    numberedPara(p(), normal(`Petitioner has been continuously detained at ${v(d.facilityName)} since ${formatDate(d.detentionDate)}\u2014a total of ${v(d.monthsDetained)} months to date. See attached Exhibit B: Detainee Locator.`)),
+
+    subSectionTitle("3. Current Removal Proceedings and Likelihood of Relief"),
+
+    numberedPara(p(), normal(`Petitioner is in removal proceedings before the ${v(d.immigrationCourtLocation)} Immigration Court.`)),
+
+    numberedPara(p(), normal(`His next master calendar hearing is scheduled for ${formatDate(d.nextHearingDate)}. See attached Exhibit C: Automated Case Information. ICE has provided no timeline for completion of proceedings.`)),
+
+    numberedPara(p(), normal(`Petitioner has applied for ${reliefText}.`)),
+
+    subSectionTitle("4. Harm from Continued Detention"),
+
+    numberedPara(p(), normal("Petitioner\u2019s continued detention causes severe and irreparable harm.")),
+
+    numberedPara(p(), bold("Economic Harm: "), normal(v(d.economicHarm, "Loss of employment and income; family unable to pay rent or mortgage and facing eviction/foreclosure."))),
+
+    numberedPara(p(), bold("Familial Harm: "), normal(v(d.familialHarm, "Separation from spouse and children; spouse unable to work due to childcare responsibilities."))),
+
+    numberedPara(p(), bold("Inability to Defend Against Removal: "), normal("Petitioner is unable to gather documentary evidence for his relief application while in custody; he has limited access to his attorney while in ICE custody; he cannot locate witnesses or obtain declarations needed to defend his case.")),
+
+    numberedPara(p(), normal("Each day of continued detention exacerbates these harms.")),
+  ];
+
+  // --- IV. CLAIM FOR RELIEF ---
+  children.push(
+    sectionTitle("IV. CLAIM FOR RELIEF"),
+    centered(underline("VIOLATION OF FIFTH AMENDMENT DUE PROCESS")),
+
+    numberedPara(p(), normal("Petitioner incorporates all preceding paragraphs.")),
+
+    numberedPara(p(), normal("The Fifth Amendment to the United States Constitution guarantees that no person shall be deprived of life, liberty, or property without due process of law.")),
+
+    numberedPara(p(), normal("This guarantee extends to all persons within the United States, including noncitizens in removal proceedings. "),
+      italic("Zadvydas v. Davis"),
+      normal(", 533 U.S. 678, 693 (2001); "),
+      italic("Reno v. Flores"),
+      normal(", 507 U.S. 292, 306 (1993).")
+    ),
+
+    numberedPara(p(), normal("Petitioner\u2019s detention violates both substantive and procedural due process in multiple, reinforcing ways.")),
+
+    // A. Substantive Due Process
+    subSectionTitle("A. Substantive Due Process: Indefinite Detention Without Individualized Determination"),
+
+    numberedPara(p(), normal("The Supreme Court has held that indefinite or prolonged civil detention raises \u201Cserious constitutional concerns.\u201D "),
+      italic("Zadvydas"),
+      normal(", 533 U.S. at 690.")
+    ),
+
+    numberedPara(p(), normal("To avoid these concerns, the Supreme Court has \u201Cread an implicit limitation\u201D into immigration detention statutes requiring individualized determinations and temporal limits. "),
+      italic("Id."),
+      normal(" at 689.")
+    ),
+
+    numberedPara(p(), normal("The Supreme Court identified six months as a \u201Cpresumptively reasonable period\u201D for immigration detention. "),
+      italic("Id."),
+      normal(" at 701.")
+    ),
+
+    numberedPara(p(), normal(`While Petitioner has been detained for ${v(d.monthsDetained)} months, he faces indefinite detention with no end in sight:`)),
+
+    subPara("a", normal("Section 1225(b)(2)(A) contains no temporal limitation whatsoever;")),
+    subPara("b", normal("The statute provides for detention \u201Cpending a proceeding under section 1229a,\u201D which could last months or years;")),
+    subPara("c", normal("Petitioner\u2019s removal proceedings have no definite conclusion date and could last months or over a year for the adjudication and appellate process to conclude;")),
+    subPara("d", normal("Cases involving applications for relief and appeal to the Board of Immigration Appeals routinely take 9\u201324+ months to resolve;")),
+    subPara("e", normal("ICE has provided no timeline for completion of proceedings or release from detention.")),
+
+    numberedPara(p(), normal(`Even though Petitioner has been detained for \u201Conly\u201D ${v(d.monthsDetained)} months, the trajectory of his case makes clear he will be detained far beyond the six-month presumptively reasonable period absent intervention by this Court.`)),
+
+    numberedPara(p(), normal("Unlike the post-deportation/removal order detention at issue in "),
+      italic("Zadvydas"),
+      normal(", Petitioner\u2019s detention is even more troubling because:")
+    ),
+
+    subPara("a", normal("He is detained during, not after, removal proceedings, when he is actively pursuing relief;")),
+    subPara("b", normal("The proceedings themselves could last indefinitely;")),
+    subPara("c", normal("He has had no hearing whatsoever to determine the necessity of detention; and")),
+    subPara("d", normal("He faces categorical detention based on a recently-changed legal classification, not individualized facts.")),
+
+    numberedPara(p(), normal("Respondents have made no individualized determination that Petitioner\u2019s continued detention is necessary to prevent flight or danger to the community, which are the only constitutionally permissible bases for preventive civil detention. "),
+      italic("United States v. Salerno"),
+      normal(", 481 U.S. 739, 748 (1987).")
+    ),
+
+    numberedPara(p(), normal("To the contrary, all evidence demonstrates Petitioner poses neither risk:")),
+
+    subPara("a", normal(hasCriminal
+      ? `Petitioner has resided in the United States for ${v(d.yearsInUS)} years with only ${v(d.criminalHistoryDetails, "a minor criminal citation")} which is not a violent or a crime of moral turpitude;`
+      : `Petitioner has resided in the United States for ${v(d.yearsInUS)} years without a single criminal arrest, charge, or conviction;`)),
+    subPara("b", normal(`Petitioner maintained stable employment and residence throughout his time in the United States${d.employmentDetails && d.employmentDetails.trim() ? " " + d.employmentDetails.trim() : ""};`)),
+    subPara("c", normal(hasCriminal
+      ? "Petitioner had zero violations of immigration condition;"
+      : "Petitioner had zero violations of any law or immigration condition;")),
+    subPara("d", normal(`Petitioner has deep family ties to the United States, including ${v(d.usCitizenFamilyMembers, "U.S. citizen/LPR family members")};`)),
+    subPara("e", normal("No individualized assessment has ever identified Petitioner as a flight risk or danger.")),
+
+    numberedPara(p(), normal("Petitioner\u2019s detention is purely categorical, based solely on his legal classification as an \u201Capplicant for admission\u201D\u2014not on any individualized finding that he personally requires detention.")),
+
+    numberedPara(p(), normal("This categorical, indefinite detention without individualized determination violates substantive due process.")),
+
+    // B. Procedural Due Process
+    subSectionTitle("B. Procedural Due Process: Complete Deprivation of Hearing"),
+
+    numberedPara(p(), normal("The Fifth Amendment requires meaningful procedural protections before deprivation of physical liberty\u2014one of the most fundamental interests protected by the Constitution.")),
+
+    numberedPara(p(), normal("Under "),
+      italic("Mathews v. Eldridge"),
+      normal(", 424 U.S. 319, 335 (1976), courts apply a three-part balancing test to determine what process is due: (1) the private interest affected by government action; (2) the risk of erroneous deprivation through procedures used and the probable value of additional safeguards; and (3) the government\u2019s interest, including the fiscal and administrative burdens of additional procedures.")
+    ),
+
+    numberedPara(p(), normal("Applying the "),
+      italic("Mathews"),
+      normal(" balancing test here, the constitutional scales tip overwhelmingly in favor of providing Petitioner a hearing.")
+    ),
+
+    numberedPara(p(), bold("First Factor: Private Interest. "), normal("Petitioner\u2019s private interest is among the most fundamental protected by the Constitution\u2014physical liberty and the ability to remain with his family.")),
+
+    numberedPara(p(), bold("Second Factor: Risk of Erroneous Deprivation. "), normal("The risk of erroneous deprivation here is not merely substantial\u2014it is 100%.")),
+
+    numberedPara(p(), bold("Third Factor: Government Interest. "), normal(hasCriminal
+      ? "The government\u2019s interests are preventing flight and protecting public safety. However, these interests are not served by detaining someone who has proven through years of peaceful residence that he will appear and poses no danger."
+      : "The government\u2019s interests are preventing flight and protecting public safety. However, these interests are not served by detaining someone who has proven through years of law-abiding conduct that he will appear and poses no danger.")),
+
+    numberedPara(p(), normal("The "),
+      italic("Mathews"),
+      normal(" balancing test overwhelmingly favors providing Petitioner a hearing before a neutral decision-maker with authority to order release upon a showing that he is not a flight risk or danger.")
+    ),
+
+    numberedPara(p(), normal("At minimum, due process requires:")),
+    subPara("a", normal("Notice of the reasons for continued detention;")),
+    subPara("b", normal("An opportunity to present evidence that Petitioner is neither a flight risk nor a danger to the community;")),
+    subPara("c", normal("A hearing before a neutral decision-maker (not ICE, which is the prosecuting/detaining authority); and")),
+    subPara("d", normal("Authority in that decision-maker to order release on bond or conditions if Petitioner meets his burden.")),
+
+    numberedPara(p(), normal("Respondents have provided none of these procedural protections. Petitioner has received no hearing, no opportunity to present evidence of his ties and compliance, and no review by any neutral arbiter.")),
+
+    numberedPara(p(), normal("This complete deprivation of process violates the Fifth Amendment.")),
+
+    // C. Equal Protection
+    subSectionTitle("C. Equal Protection: Arbitrary Classification"),
+
+    numberedPara(p(), normal("The Fifth Amendment\u2019s due process clause incorporates equal protection principles applicable to federal government action. "),
+      italic("Bolling v. Sharpe"),
+      normal(", 347 U.S. 497, 499 (1954).")
+    ),
+
+    numberedPara(p(), normal("Equal protection requires that the government treat similarly situated individuals alike, absent a rational basis for differential treatment.")),
+
+    numberedPara(p(), normal(`Respondents treat Petitioner\u2014who entered the United States without inspection ${v(d.yearsInUS)} years ago\u2014fundamentally differently from a noncitizen who entered lawfully but overstayed a visa for many years.`)),
+
+    numberedPara(p(), normal("These two individuals are identically situated in all relevant respects.")),
+
+    numberedPara(p(), normal("Yet the government treats them completely differently.")),
+
+    numberedPara(p(), normal(`This differential treatment is based solely on the manner of entry many years ago\u2014a factor that bears no rational relationship to the government\u2019s stated interests in preventing flight and protecting public safety.`)),
+
+    numberedPara(p(), normal(`Indeed, the manner of entry ${v(d.yearsInUS)} years ago tells us nothing about current flight risk or danger.`)),
+
+    numberedPara(p(), normal("The government\u2019s asserted interest in \u201Cequal treatment\u201D of noncitizens at the border and in the interior cannot justify this arbitrary classification.")),
+
+    numberedPara(p(), normal("This classification violates equal protection because it treats identically situated individuals differently based on an arbitrary factor unrelated to any legitimate government interest.")),
+
+    // D. Arbitrary and Capricious
+    subSectionTitle("D. Arbitrary and Capricious Government Action: Detention After Prolonged Non-Enforcement"),
+
+    numberedPara(p(), normal("The Due Process Clause prohibits arbitrary government action. "),
+      italic("County of Sacramento v. Lewis"),
+      normal(", 523 U.S. 833, 845\u201346 (1998).")
+    ),
+
+    numberedPara(p(), normal(`The government\u2019s sudden decision to detain Petitioner after ${v(d.yearsInUS)} years of non-enforcement, with no change whatsoever in his individual circumstances, constitutes arbitrary government action.`)),
+
+    numberedPara(p(), normal(`During ${v(d.yearsInUS)} years of physical presence in the United States, Petitioner built an established life in reasonable reliance on his circumstances.`)),
+
+    numberedPara(p(), normal(hasCriminal
+      ? `The government\u2019s prolonged non-enforcement over ${v(d.yearsInUS)} years demonstrates that Petitioner presents no flight risk or danger. `
+      : `The government\u2019s prolonged non-enforcement over ${v(d.yearsInUS)} years, combined with Petitioner\u2019s complete compliance with all applicable laws during that period, demonstrates that Petitioner presents no flight risk or danger. `),
+      italic("Salerno"),
+      normal(", 481 U.S. at 748.")
+    ),
+
+    numberedPara(p(), normal("Now, with no change in Petitioner\u2019s individual circumstances, the government has detained him based solely on a policy change following "),
+      italic("Buenrostro-Mendez"),
+      normal(". This is the paradigm of arbitrary action.")
+    ),
+
+    numberedPara(p(), normal("While the Fifth Circuit has not recognized a formal doctrine of \u201Cnon-enforcement acquiescence\u201D in the immigration detention context, the due process prohibition on arbitrary government action provides an independent basis for relief. See "),
+      italic("Lewis"),
+      normal(", 523 U.S. at 845\u201346.")
+    ),
+
+    numberedPara(p(), normal(`This arbitrary detention, premised solely on a policy change and Petitioner\u2019s manner of entry ${v(d.yearsInUS)} years ago rather than any current, individualized assessment, violates the Fifth Amendment\u2019s due process guarantee.`)),
+
+    // E. As-Applied
+    subSectionTitle("E. As-Applied Constitutional Challenge"),
+
+    numberedPara(p(), normal("Even if \u00A71225(b)(2)(A) could be constitutionally applied to some individuals in some circumstances, its application to Petitioner violates the Constitution.")),
+
+    numberedPara(p(), normal("Petitioner presents the precise scenario where mandatory detention without a hearing cannot be constitutionally sustained:")),
+
+    subPara("a", normal(`Long-term U.S. resident (${v(d.yearsInUS)} years) with deep community and family ties;`)),
+    subPara("b", normal(`Government engaged in ${v(d.yearsInUS)} years of non-enforcement, during which Petitioner demonstrated zero flight risk or danger;`)),
+    ...(hasCriminal ? [] : [
+      subPara("c", normal("Proven track record of compliance with all applicable laws, eliminating any individualized flight risk or danger concern;")),
+    ]),
+    subPara(hasCriminal ? "c" : "d", normal("Indefinite detention with no timeline for completion of proceedings;")),
+    subPara(hasCriminal ? "d" : "e", normal(`Strong case for relief from removal (${reliefText});`)),
+    subPara(hasCriminal ? "e" : "f", normal("Severe, irreparable harm from continued detention; and")),
+    subPara(hasCriminal ? "f" : "g", normal("Detention based solely on a policy change, not individual facts.")),
+
+    numberedPara(p(), normal("The Fifth Circuit in "),
+      italic("Buenrostro-Mendez"),
+      normal(" acknowledged that constitutional concerns about \u00A71225(b)(2)(A) were \u201Cwholly speculative\u201D at the time. Slip op. at 21.")
+    ),
+
+    numberedPara(p(), normal("Petitioner\u2019s case makes these concerns concrete, not speculative. This is precisely the type of as-applied challenge the Fifth Circuit did not address and could not foreclose.")),
+
+    numberedPara(p(), normal("For all these reasons, Petitioner\u2019s continued detention violates the Fifth Amendment\u2019s guarantee of due process and equal protection.")),
+
+    // V. PRAYER FOR RELIEF
+    sectionTitle("V. PRAYER FOR RELIEF"),
+
+    justified(bold("WHEREFORE"), normal(", Petitioner respectfully requests that this Court:")),
+
+    subPara("a", normal("Declare that Petitioner\u2019s continued detention violates the Fifth Amendment to the United States Constitution;")),
+    subPara("b", normal("Issue a Writ of Habeas Corpus ordering Petitioner\u2019s immediate release from custody, subject to reasonable conditions of supervision including GPS monitoring, regular ICE check-ins, surrender of travel documents, and/or reasonable bond;")),
+    subPara("c", normal("Alternatively, order Respondents to provide Petitioner with an individualized hearing before a neutral decision-maker within seven (7) days;")),
+    subPara("d", normal("Enjoin Respondents from continuing to detain Petitioner in violation of his constitutional rights;")),
+    subPara("e", normal("Order a stay of removal proceedings pending resolution of this petition;")),
+    subPara("f", normal("Award costs and attorney\u2019s fees pursuant to 28 U.S.C. \u00A72412 and other applicable law; and")),
+    subPara("g", normal("Grant such other and further relief as the Court deems just and proper.")),
+
+    // VI. VERIFICATION
+    sectionTitle("VI. VERIFICATION"),
+
+    justified(normal("I declare under penalty of perjury that the foregoing is true and correct.")),
+
+    emptyLine(),
+    emptyLine(),
+
+    new Paragraph({
+      spacing: { after: 60 },
+      indent: { left: 4320 },
+      children: [normal("Respectfully submitted,")],
+    }),
+    emptyLine(),
+    new Paragraph({
+      spacing: { after: 60 },
+      indent: { left: 4320 },
+      children: [italic("/s/ Manuel E. Solis")],
+    }),
+    new Paragraph({
+      spacing: { after: 60 },
+      indent: { left: 4320 },
+      children: [bold("Manuel E. Solis")],
+    }),
+    new Paragraph({
+      spacing: { after: 60 },
+      indent: { left: 4320 },
+      children: [normal("Attorney for Petitioner")],
+    }),
+    new Paragraph({
+      spacing: { after: 60 },
+      indent: { left: 4320 },
+      children: [normal("State Bar No. 18826790")],
+    }),
+    new Paragraph({
+      spacing: { after: 60 },
+      indent: { left: 4320 },
+      children: [normal("P.O. Box 230593")],
+    }),
+    new Paragraph({
+      spacing: { after: 60 },
+      indent: { left: 4320 },
+      children: [normal("Houston TX 77223")],
+    }),
+    new Paragraph({
+      spacing: { after: 60 },
+      indent: { left: 4320 },
+      children: [normal("Houston Office: 713-481-1030")],
+    }),
+    new Paragraph({
+      spacing: { after: 200 },
+      indent: { left: 4320 },
+      children: [normal("casestatus@manuelsolis.com")],
+    }),
+
+    // CERTIFICATES OF SERVICE
+    ...generateCertificateOfService(
+      formatDate(d.serviceDateWarden || d.serviceDateFieldOffice),
+      `${v(d.wardenName, "RANDY TATE").toUpperCase()}, in ${v(d.wardenTitle, "his")} Official Capacity as Warden of the ${v(d.facilityName, "Montgomery Processing Center")}`,
+      `Immigration and Customs Enforcement (\u201CICE\u201D) ${v(d.facilityName, "Montgomery Processing Center")}, located at ${v(d.facilityAddress, "[ADDRESS]")}`
+    ),
+
+    ...generateCertificateOfService(
+      formatDate(d.serviceDateFieldOffice),
+      `${v(d.fieldOfficeDirector, "Bret Bradford")}, in his Official Capacity as Field Office Director, of ICE Enforcement and Removal Operations ${v(d.eroFieldOffice, "Houston Field Office")}`,
+      `(1) Office of the Field Office Director, Enforcement and Removal Operations, ${v(d.eroFieldOffice, "Houston Field Office")}, ${getEroFieldOfficeAddress(d.eroFieldOffice) || "126 Northpoint Drive, Houston, Texas 77060"}`
+    ),
+
+    ...generateCertificateOfService(
+      formatDate(d.serviceDateDHS),
+      "MARKWAYNE MULLIN, in his Official Capacity as Director of U.S. Department of Homeland Security",
+      "(1) Office of General Counsel, U.S. Department of Homeland Security, 245 Murray Lane, SW, Mail Stop 0485, Washington, D.C. 20530"
+    ),
+
+    ...generateCertificateOfServiceEmail(
+      formatDate(d.serviceDateAG),
+      "Todd Blanche, in his Official Capacity as Acting Attorney General of the United States",
+      "Office of the Attorney General, 950 Pennsylvania Avenue, NW Washington, DC 20530"
+    ),
+  );
 
   return new Document({
     sections: [
@@ -199,420 +640,7 @@ export function generateHabeasDocument(data: CaseData): Document {
             ],
           }),
         },
-        children: [
-          // CAPTION
-          centered(bold("UNITED STATES DISTRICT COURT")),
-          centered(bold("FOR THE SOUTHERN DISTRICT OF TEXAS")),
-          centered(bold("HOUSTON DIVISION")),
-          centered(bold(`CIVIL No. ${v(d.civilNo, "__________")}`)),
-
-          // Horizontal line above caption
-          new Paragraph({
-            spacing: { after: 0 },
-            border: { bottom: { style: BorderStyle.SINGLE, size: 6, space: 1, color: "000000" } },
-            children: [],
-          }),
-
-          // Case caption table with § dividers
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            borders: noBorders,
-            rows: [
-              captionRow([normal(`${v(d.petitionerName).toUpperCase()},`)], []),
-              captionRow([], []),
-              captionRow([italic("     Petitioner")], []),
-              captionRow([], []),
-              captionRow([], [bold("PETITION FOR")]),
-              captionRow([normal("v.")], [bold("WRIT OF HABEAS CORPUS")]),
-              captionRow([], [bold("PURSUANT TO 28 U.S.C \u00A72241")]),
-              captionRow([normal(`${v(d.wardenName).toUpperCase()}, in ${v(d.wardenTitle, "his")} official capacity`)], []),
-              captionRow([normal(`as ${v(d.wardenTitle, "Warden")} of the ${v(d.facilityName)} Detention Center;`)], []),
-              captionRow([], []),
-              captionRow([normal(`${v(d.fieldOfficeDirector, "BRET BRADFORD").toUpperCase()}, in his official capacity as`)], []),
-              captionRow([normal("Field Office Director of ICE Enforcement and")], []),
-              captionRow([normal(`Removal Operations ${v(d.eroFieldOffice, "Houston Field Office")};`)], []),
-              captionRow([], []),
-              captionRow([normal("MARKWAYNE MULLIN, in his official capacity as")], []),
-              captionRow([normal("Secretary of the Department of Homeland Security;")], []),
-              captionRow([], []),
-              captionRow([normal("TODD BLANCHE, in his official capacity as")], []),
-              captionRow([normal("Acting Attorney General of the United States,")], []),
-              captionRow([], []),
-              captionRow([italic("     Respondents.")], []),
-            ],
-          }),
-
-          // Horizontal line below caption
-          new Paragraph({
-            spacing: { after: 200 },
-            border: { bottom: { style: BorderStyle.SINGLE, size: 6, space: 1, color: "000000" } },
-            children: [],
-          }),
-
-          // Title
-          centered(bold("PETITION FOR WRIT OF HABEAS CORPUS PURSUANT TO 28 U.S.C. \u00A72241")),
-          centered(bold("AND COMPLAINT FOR DECLARATORY AND INJUNCTIVE RELIEF")),
-          emptyLine(),
-
-          // I. INTRODUCTION
-          sectionTitle("I. INTRODUCTION"),
-
-          justified(
-            normal(`Petitioner has been detained by Immigration and Customs Enforcement (ICE) for ${v(d.monthsDetained)} months without any individualized determination that he presents a flight risk or danger to the community. He seeks immediate release or, at minimum, a hearing before a neutral decision-maker. Petitioner lived in the United States for ${v(d.yearsInUS)} years without ever being apprehended, detained, or placed in removal proceedings. During that time, he maintained stable employment and residence, built deep family ties in the United States, and had zero criminal arrests, charges, or convictions. He was detained solely due to a change in government policy, with no change in his individual circumstances.`)
-          ),
-
-          justified(
-            normal(`This case does not challenge the Fifth Circuit\u2019s recent decision in `),
-            italic("Buenrostro-Mendez v. Bondi"),
-            normal(`, No. 25-20496 (5th Cir. Feb. 6, 2026), which held that certain noncitizens are subject to mandatory detention under 8 U.S.C. \u00A71225(b)(2)(A). Rather, it challenges the constitutional application of that statute to Petitioner\u2019s specific circumstances.`)
-          ),
-
-          justified(
-            normal(`The Fifth Circuit recognized that constitutional questions about prolonged detention under \u00A71225(b)(2)(A) were \u201Cwholly speculative\u201D at the time of its decision. `),
-            italic("Buenrostro-Mendez"),
-            normal(`, slip op. at 21. Petitioner\u2019s ${v(d.monthsDetained)}-month detention, following ${v(d.yearsInUS)} years of law-abiding residence in the United States without a single criminal violation or immigration infraction, makes these concerns concrete. The Constitution does not permit indefinite detention without individualized review, regardless of statutory classification.`)
-          ),
-
-          // II. JURISDICTION
-          sectionTitle("II. JURISDICTION AND AUTHORITY"),
-
-          numberedPara("1", normal("Jurisdiction lies under 28 U.S.C. \u00A72241 and 28 U.S.C. \u00A71331.")),
-
-          numberedPara("2", normal("The Fifth Circuit recognizes habeas jurisdiction over challenges to the fact and legality of immigration detention, including constitutional claims. See "),
-            italic("Zadvydas v. Davis"),
-            normal(", 533 U.S. 678 (2001); "),
-            italic("Pierre v. United States"),
-            normal(", 525 F.2d 933 (5th Cir. 1976).")
-          ),
-
-          numberedPara("3", normal("This Court has authority to issue a TRO to halt ongoing constitutional violations. See "),
-            italic("Opulent Life Church v. City of Holly Springs"),
-            normal(", 697 F.3d 279, 295 (5th Cir. 2012).")
-          ),
-
-          // III. STATEMENT OF FACTS
-          sectionTitle("III. STATEMENT OF FACTS"),
-          subSectionTitle("1. Background and Family Ties"),
-
-          numberedPara("4", normal(`Petitioner is ${v(d.petitionerAge)} years old and has resided in the United States for ${v(d.yearsInUS)} years, since ${v(d.yearOfEntry)}. See attached Exhibit A.`)),
-
-          numberedPara("5", normal(`Petitioner and his family live at ${v(d.petitionerAddress)}.`)),
-
-          numberedPara("6", normal(`Petitioner has no criminal record and no history of immigration violations other than unlawful entry in ${v(d.yearOfEntry)}.`)),
-
-          numberedPara("7", normal(`Prior to his detention on ${formatDate(d.detentionDate)}, Petitioner had never been apprehended, detained, or placed in removal proceedings by any immigration authority. He lived openly in the United States and had no prior ICE contact of any kind.`)),
-
-          subSectionTitle("2. Detention Under \u00A71225(b)(2)(A)"),
-
-          numberedPara("8", normal(`On ${formatDate(d.detentionDate)}, ICE apprehended Petitioner during ${v(d.apprehensionCircumstance)} and took him into custody.`)),
-
-          numberedPara("9", normal(`ICE asserts authority to detain Petitioner under 8 U.S.C. \u00A71225(b)(2)(A), claiming he is an \u201Capplicant for admission\u201D subject to mandatory detention based on his manner of entry ${v(d.yearsInUS)} years ago.`)),
-
-          numberedPara("10", normal("ICE has provided no explanation for its decision to detain Petitioner, other than changed \u201Cpolicy\u201D following the Fifth Circuit\u2019s decision in "),
-            italic("Buenrostro-Mendez v. Bondi"),
-            normal(", No. 25-20496 (5th Cir. Feb. 6, 2026).")
-          ),
-
-          numberedPara("11", normal(`Petitioner has been continuously detained at ${v(d.facilityName)} since ${formatDate(d.detentionDate)}\u2014a total of ${v(d.monthsDetained)} months to date. See attached Exhibit B: Detainee Locator.`)),
-
-          subSectionTitle("3. Current Removal Proceedings and Likelihood of Relief"),
-
-          numberedPara("12", normal(`Petitioner is in removal proceedings before the ${v(d.immigrationCourtLocation)} Immigration Court.`)),
-
-          numberedPara("13", normal(`His next master calendar hearing is scheduled for ${formatDate(d.nextHearingDate)}. See attached Exhibit C: Automated Case Information. ICE has provided no timeline for completion of proceedings.`)),
-
-          numberedPara("14", normal(`Petitioner has applied for ${reliefText}.`)),
-
-          subSectionTitle("4. Harm from Continued Detention"),
-
-          numberedPara("15", normal("Petitioner\u2019s continued detention causes severe and irreparable harm.")),
-
-          numberedPara("16", bold("Economic Harm: "), normal(v(d.economicHarm, "Loss of employment and income; family unable to pay rent or mortgage and facing eviction/foreclosure."))),
-
-          numberedPara("17", bold("Familial Harm: "), normal(v(d.familialHarm, "Separation from spouse and children; spouse unable to work due to childcare responsibilities."))),
-
-          numberedPara("18", bold("Inability to Defend Against Removal: "), normal("Petitioner is unable to gather documentary evidence for his relief application while in custody; he has limited access to his attorney while in ICE custody; he cannot locate witnesses or obtain declarations needed to defend his case.")),
-
-          numberedPara("19", normal("Each day of continued detention exacerbates these harms.")),
-
-          // IV. CLAIM FOR RELIEF
-          sectionTitle("IV. CLAIM FOR RELIEF"),
-          centered(underline("VIOLATION OF FIFTH AMENDMENT DUE PROCESS")),
-
-          numberedPara("20", normal("Petitioner incorporates all preceding paragraphs.")),
-
-          numberedPara("21", normal("The Fifth Amendment to the United States Constitution guarantees that no person shall be deprived of life, liberty, or property without due process of law.")),
-
-          numberedPara("22", normal("This guarantee extends to all persons within the United States, including noncitizens in removal proceedings. "),
-            italic("Zadvydas v. Davis"),
-            normal(", 533 U.S. 678, 693 (2001); "),
-            italic("Reno v. Flores"),
-            normal(", 507 U.S. 292, 306 (1993).")
-          ),
-
-          numberedPara("23", normal("Petitioner\u2019s detention violates both substantive and procedural due process in multiple, reinforcing ways.")),
-
-          // A. Substantive Due Process
-          subSectionTitle("A. Substantive Due Process: Indefinite Detention Without Individualized Determination"),
-
-          numberedPara("24", normal("The Supreme Court has held that indefinite or prolonged civil detention raises \u201Cserious constitutional concerns.\u201D "),
-            italic("Zadvydas"),
-            normal(", 533 U.S. at 690.")
-          ),
-
-          numberedPara("25", normal("To avoid these concerns, the Supreme Court has \u201Cread an implicit limitation\u201D into immigration detention statutes requiring individualized determinations and temporal limits. "),
-            italic("Id."),
-            normal(" at 689.")
-          ),
-
-          numberedPara("26", normal("The Supreme Court identified six months as a \u201Cpresumptively reasonable period\u201D for immigration detention. "),
-            italic("Id."),
-            normal(" at 701.")
-          ),
-
-          numberedPara("27", normal(`While Petitioner has been detained for ${v(d.monthsDetained)} months, he faces indefinite detention with no end in sight:`)),
-
-          subPara("a", normal("Section 1225(b)(2)(A) contains no temporal limitation whatsoever;")),
-          subPara("b", normal("The statute provides for detention \u201Cpending a proceeding under section 1229a,\u201D which could last months or years;")),
-          subPara("c", normal("Petitioner\u2019s removal proceedings have no definite conclusion date and could last months or over a year for the adjudication and appellate process to conclude;")),
-          subPara("d", normal("Cases involving applications for relief and appeal to the Board of Immigration Appeals routinely take 9\u201324+ months to resolve;")),
-          subPara("e", normal("ICE has provided no timeline for completion of proceedings or release from detention.")),
-
-          numberedPara("28", normal(`Even though Petitioner has been detained for \u201Conly\u201D ${v(d.monthsDetained)} months, the trajectory of his case makes clear he will be detained far beyond the six-month presumptively reasonable period absent intervention by this Court.`)),
-
-          numberedPara("29", normal("Unlike the post-deportation/removal order detention at issue in "),
-            italic("Zadvydas"),
-            normal(", Petitioner\u2019s detention is even more troubling because:")
-          ),
-
-          subPara("a", normal("He is detained during, not after, removal proceedings, when he is actively pursuing relief;")),
-          subPara("b", normal("The proceedings themselves could last indefinitely;")),
-          subPara("c", normal("He has had no hearing whatsoever to determine the necessity of detention; and")),
-          subPara("d", normal("He faces categorical detention based on a recently-changed legal classification, not individualized facts.")),
-
-          numberedPara("30", normal("Respondents have made no individualized determination that Petitioner\u2019s continued detention is necessary to prevent flight or danger to the community, which are the only constitutionally permissible bases for preventive civil detention. "),
-            italic("United States v. Salerno"),
-            normal(", 481 U.S. 739, 748 (1987).")
-          ),
-
-          numberedPara("31", normal("To the contrary, all evidence demonstrates Petitioner poses neither risk:")),
-
-          subPara("a", normal(`Petitioner has resided in the United States for ${v(d.yearsInUS)} years without a single criminal arrest, charge, or conviction;`)),
-          subPara("b", normal("Petitioner maintained stable employment and residence throughout his time in the United States;")),
-          subPara("c", normal("Petitioner had zero violations of any law or immigration condition;")),
-          subPara("d", normal(`Petitioner has deep family ties to the United States, including ${v(d.usCitizenFamilyMembers, "U.S. citizen/LPR family members")};`)),
-          subPara("e", normal("No individualized assessment has ever identified Petitioner as a flight risk or danger.")),
-
-          numberedPara("32", normal("Petitioner\u2019s detention is purely categorical, based solely on his legal classification as an \u201Capplicant for admission\u201D\u2014not on any individualized finding that he personally requires detention.")),
-
-          numberedPara("33", normal("This categorical, indefinite detention without individualized determination violates substantive due process.")),
-
-          // B. Procedural Due Process
-          subSectionTitle("B. Procedural Due Process: Complete Deprivation of Hearing"),
-
-          numberedPara("34", normal("The Fifth Amendment requires meaningful procedural protections before deprivation of physical liberty\u2014one of the most fundamental interests protected by the Constitution.")),
-
-          numberedPara("35", normal("Under "),
-            italic("Mathews v. Eldridge"),
-            normal(", 424 U.S. 319, 335 (1976), courts apply a three-part balancing test to determine what process is due: (1) the private interest affected by government action; (2) the risk of erroneous deprivation through procedures used and the probable value of additional safeguards; and (3) the government\u2019s interest, including the fiscal and administrative burdens of additional procedures.")
-          ),
-
-          numberedPara("36", normal("Applying the "),
-            italic("Mathews"),
-            normal(" balancing test here, the constitutional scales tip overwhelmingly in favor of providing Petitioner a hearing.")
-          ),
-
-          numberedPara("37", bold("First Factor: Private Interest. "), normal("Petitioner\u2019s private interest is among the most fundamental protected by the Constitution\u2014physical liberty and the ability to remain with his family.")),
-
-          numberedPara("38", bold("Second Factor: Risk of Erroneous Deprivation. "), normal("The risk of erroneous deprivation here is not merely substantial\u2014it is 100%.")),
-
-          numberedPara("39", bold("Third Factor: Government Interest. "), normal("The government\u2019s interests are preventing flight and protecting public safety. However, these interests are not served by detaining someone who has proven through years of law-abiding conduct that he will appear and poses no danger.")),
-
-          numberedPara("40", normal("The "),
-            italic("Mathews"),
-            normal(" balancing test overwhelmingly favors providing Petitioner a hearing before a neutral decision-maker with authority to order release upon a showing that he is not a flight risk or danger.")
-          ),
-
-          numberedPara("41", normal("At minimum, due process requires:")),
-          subPara("a", normal("Notice of the reasons for continued detention;")),
-          subPara("b", normal("An opportunity to present evidence that Petitioner is neither a flight risk nor a danger to the community;")),
-          subPara("c", normal("A hearing before a neutral decision-maker (not ICE, which is the prosecuting/detaining authority); and")),
-          subPara("d", normal("Authority in that decision-maker to order release on bond or conditions if Petitioner meets his burden.")),
-
-          numberedPara("42", normal("Respondents have provided none of these procedural protections. Petitioner has received no hearing, no opportunity to present evidence of his ties and compliance, and no review by any neutral arbiter.")),
-
-          numberedPara("43", normal("This complete deprivation of process violates the Fifth Amendment.")),
-
-          // C. Equal Protection
-          subSectionTitle("C. Equal Protection: Arbitrary Classification"),
-
-          numberedPara("44", normal("The Fifth Amendment\u2019s due process clause incorporates equal protection principles applicable to federal government action. "),
-            italic("Bolling v. Sharpe"),
-            normal(", 347 U.S. 497, 499 (1954).")
-          ),
-
-          numberedPara("45", normal("Equal protection requires that the government treat similarly situated individuals alike, absent a rational basis for differential treatment.")),
-
-          numberedPara("46", normal(`Respondents treat Petitioner\u2014who entered the United States without inspection ${v(d.yearsInUS)} years ago\u2014fundamentally differently from a noncitizen who entered lawfully but overstayed a visa for many years.`)),
-
-          numberedPara("47", normal("These two individuals are identically situated in all relevant respects.")),
-
-          numberedPara("48", normal("Yet the government treats them completely differently.")),
-
-          numberedPara("49", normal(`This differential treatment is based solely on the manner of entry many years ago\u2014a factor that bears no rational relationship to the government\u2019s stated interests in preventing flight and protecting public safety.`)),
-
-          numberedPara("50", normal(`Indeed, the manner of entry ${v(d.yearsInUS)} years ago tells us nothing about current flight risk or danger.`)),
-
-          numberedPara("51", normal("The government\u2019s asserted interest in \u201Cequal treatment\u201D of noncitizens at the border and in the interior cannot justify this arbitrary classification.")),
-
-          numberedPara("52", normal("This classification violates equal protection because it treats identically situated individuals differently based on an arbitrary factor unrelated to any legitimate government interest.")),
-
-          // D. Arbitrary and Capricious
-          subSectionTitle("D. Arbitrary and Capricious Government Action: Detention After Prolonged Non-Enforcement"),
-
-          numberedPara("53", normal("The Due Process Clause prohibits arbitrary government action. "),
-            italic("County of Sacramento v. Lewis"),
-            normal(", 523 U.S. 833, 845\u201346 (1998).")
-          ),
-
-          numberedPara("54", normal(`The government\u2019s sudden decision to detain Petitioner after ${v(d.yearsInUS)} years of non-enforcement, with no change whatsoever in his individual circumstances, constitutes arbitrary government action.`)),
-
-          numberedPara("55", normal(`During ${v(d.yearsInUS)} years of physical presence in the United States, Petitioner built an established life in reasonable reliance on his circumstances.`)),
-
-          numberedPara("56", normal(`The government\u2019s prolonged non-enforcement over ${v(d.yearsInUS)} years, combined with Petitioner\u2019s complete compliance with all applicable laws during that period, demonstrates that Petitioner presents no flight risk or danger. `),
-            italic("Salerno"),
-            normal(", 481 U.S. at 748.")
-          ),
-
-          numberedPara("57", normal("Now, with no change in Petitioner\u2019s individual circumstances, the government has detained him based solely on a policy change following "),
-            italic("Buenrostro-Mendez"),
-            normal(". This is the paradigm of arbitrary action.")
-          ),
-
-          numberedPara("58", normal("While the Fifth Circuit has not recognized a formal doctrine of \u201Cnon-enforcement acquiescence\u201D in the immigration detention context, the due process prohibition on arbitrary government action provides an independent basis for relief. See "),
-            italic("Lewis"),
-            normal(", 523 U.S. at 845\u201346.")
-          ),
-
-          numberedPara("59", normal(`This arbitrary detention, premised solely on a policy change and Petitioner\u2019s manner of entry ${v(d.yearsInUS)} years ago rather than any current, individualized assessment, violates the Fifth Amendment\u2019s due process guarantee.`)),
-
-          // E. As-Applied
-          subSectionTitle("E. As-Applied Constitutional Challenge"),
-
-          numberedPara("60", normal("Even if \u00A71225(b)(2)(A) could be constitutionally applied to some individuals in some circumstances, its application to Petitioner violates the Constitution.")),
-
-          numberedPara("61", normal("Petitioner presents the precise scenario where mandatory detention without a hearing cannot be constitutionally sustained:")),
-
-          subPara("a", normal(`Long-term U.S. resident (${v(d.yearsInUS)} years) with deep community and family ties;`)),
-          subPara("b", normal(`Government engaged in ${v(d.yearsInUS)} years of non-enforcement, during which Petitioner demonstrated zero flight risk or danger;`)),
-          subPara("c", normal("Proven track record of compliance with all applicable laws, eliminating any individualized flight risk or danger concern;")),
-          subPara("d", normal("Indefinite detention with no timeline for completion of proceedings;")),
-          subPara("e", normal(`Strong case for relief from removal (${reliefText});`)),
-          subPara("f", normal("Severe, irreparable harm from continued detention; and")),
-          subPara("g", normal("Detention based solely on a policy change, not individual facts.")),
-
-          numberedPara("62", normal("The Fifth Circuit in "),
-            italic("Buenrostro-Mendez"),
-            normal(" acknowledged that constitutional concerns about \u00A71225(b)(2)(A) were \u201Cwholly speculative\u201D at the time. Slip op. at 21.")
-          ),
-
-          numberedPara("63", normal("Petitioner\u2019s case makes these concerns concrete, not speculative. This is precisely the type of as-applied challenge the Fifth Circuit did not address and could not foreclose.")),
-
-          numberedPara("64", normal("For all these reasons, Petitioner\u2019s continued detention violates the Fifth Amendment\u2019s guarantee of due process and equal protection.")),
-
-          // V. PRAYER FOR RELIEF
-          sectionTitle("V. PRAYER FOR RELIEF"),
-
-          justified(bold("WHEREFORE"), normal(", Petitioner respectfully requests that this Court:")),
-
-          subPara("a", normal("Declare that Petitioner\u2019s continued detention violates the Fifth Amendment to the United States Constitution;")),
-          subPara("b", normal("Issue a Writ of Habeas Corpus ordering Petitioner\u2019s immediate release from custody, subject to reasonable conditions of supervision including GPS monitoring, regular ICE check-ins, surrender of travel documents, and/or reasonable bond;")),
-          subPara("c", normal("Alternatively, order Respondents to provide Petitioner with an individualized hearing before a neutral decision-maker within seven (7) days;")),
-          subPara("d", normal("Enjoin Respondents from continuing to detain Petitioner in violation of his constitutional rights;")),
-          subPara("e", normal("Order a stay of removal proceedings pending resolution of this petition;")),
-          subPara("f", normal("Award costs and attorney\u2019s fees pursuant to 28 U.S.C. \u00A72412 and other applicable law; and")),
-          subPara("g", normal("Grant such other and further relief as the Court deems just and proper.")),
-
-          // VI. VERIFICATION
-          sectionTitle("VI. VERIFICATION"),
-
-          justified(normal("I declare under penalty of perjury that the foregoing is true and correct.")),
-
-          emptyLine(),
-          emptyLine(),
-
-          new Paragraph({
-            spacing: { after: 60 },
-            indent: { left: 4320 },
-            children: [normal("Respectfully submitted,")],
-          }),
-          emptyLine(),
-          new Paragraph({
-            spacing: { after: 60 },
-            indent: { left: 4320 },
-            children: [italic("/s/ Manuel E. Solis")],
-          }),
-          new Paragraph({
-            spacing: { after: 60 },
-            indent: { left: 4320 },
-            children: [bold("Manuel E. Solis")],
-          }),
-          new Paragraph({
-            spacing: { after: 60 },
-            indent: { left: 4320 },
-            children: [normal("Attorney for Petitioner")],
-          }),
-          new Paragraph({
-            spacing: { after: 60 },
-            indent: { left: 4320 },
-            children: [normal("State Bar No. 18826790")],
-          }),
-          new Paragraph({
-            spacing: { after: 60 },
-            indent: { left: 4320 },
-            children: [normal("P.O. Box 230593")],
-          }),
-          new Paragraph({
-            spacing: { after: 60 },
-            indent: { left: 4320 },
-            children: [normal("Houston TX 77223")],
-          }),
-          new Paragraph({
-            spacing: { after: 60 },
-            indent: { left: 4320 },
-            children: [normal("Houston Office: 713-481-1030")],
-          }),
-          new Paragraph({
-            spacing: { after: 200 },
-            indent: { left: 4320 },
-            children: [normal("casestatus@manuelsolis.com")],
-          }),
-
-          // CERTIFICATES OF SERVICE
-          ...generateCertificateOfService(
-            formatDate(d.serviceDateWarden || d.serviceDateFieldOffice),
-            `${v(d.wardenName, "RANDY TATE").toUpperCase()}, in ${v(d.wardenTitle, "his")} Official Capacity as Warden of the ${v(d.facilityName, "Montgomery Processing Center")}`,
-            `Immigration and Customs Enforcement (\u201CICE\u201D) ${v(d.facilityName, "Montgomery Processing Center")}, located at ${v(d.facilityAddress, "[ADDRESS]")}`
-          ),
-
-          ...generateCertificateOfService(
-            formatDate(d.serviceDateFieldOffice),
-            `${v(d.fieldOfficeDirector, "Bret Bradford")}, in his Official Capacity as Field Office Director, of ICE Enforcement and Removal Operations ${v(d.eroFieldOffice, "Houston Field Office")}`,
-            `(1) Office of the Field Office Director, Enforcement and Removal Operations, ${v(d.eroFieldOffice, "Houston Field Office")}, ${getEroFieldOfficeAddress(d.eroFieldOffice) || "126 Northpoint Drive, Houston, Texas 77060"}`
-          ),
-
-          ...generateCertificateOfService(
-            formatDate(d.serviceDateDHS),
-            "MARKWAYNE MULLIN, in his Official Capacity as Director of U.S. Department of Homeland Security",
-            "(1) Office of General Counsel, U.S. Department of Homeland Security, 245 Murray Lane, SW, Mail Stop 0485, Washington, D.C. 20530"
-          ),
-
-          ...generateCertificateOfServiceEmail(
-            formatDate(d.serviceDateAG),
-            "Todd Blanche, in his Official Capacity as Acting Attorney General of the United States",
-            "Office of the Attorney General, 950 Pennsylvania Avenue, NW Washington, DC 20530"
-          ),
-        ],
+        children,
       },
     ],
   });

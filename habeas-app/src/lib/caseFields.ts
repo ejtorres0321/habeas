@@ -27,6 +27,8 @@ export interface CaseFormData {
   usCitizenFamilyMembers: string;
   economicHarm: string;
   familialHarm: string;
+  hasCriminalHistory: string;
+  criminalHistoryDetails: string;
   employmentDetails: string;
   yearsAtResidence: string;
   serviceDateWarden: string;
@@ -63,6 +65,8 @@ export const defaultCaseData: CaseFormData = {
   usCitizenFamilyMembers: "",
   economicHarm: "",
   familialHarm: "",
+  hasCriminalHistory: "no",
+  criminalHistoryDetails: "",
   employmentDetails: "",
   yearsAtResidence: "",
   serviceDateWarden: "",
@@ -79,6 +83,7 @@ export interface FieldConfig {
   options?: string[];
   placeholder?: string;
   readOnly?: boolean;
+  visibleWhen?: { field: keyof CaseFormData; value: string };
 }
 
 export const formSections: { title: string; fields: FieldConfig[] }[] = [
@@ -157,6 +162,24 @@ export const formSections: { title: string; fields: FieldConfig[] }[] = [
     fields: [
       { key: "economicHarm", label: "Economic Harm", type: "textarea", placeholder: "Loss of employment, financial consequences..." },
       { key: "familialHarm", label: "Familial Harm", type: "textarea", placeholder: "Separation from family, childcare issues..." },
+    ],
+  },
+  {
+    title: "Criminal History",
+    fields: [
+      {
+        key: "hasCriminalHistory",
+        label: "Does the petitioner have criminal history?",
+        type: "select",
+        options: ["no", "yes"],
+      },
+      {
+        key: "criminalHistoryDetails",
+        label: "Criminal History Details",
+        type: "textarea",
+        placeholder: "Describe criminal history, charges, convictions, sentences served...",
+        visibleWhen: { field: "hasCriminalHistory", value: "yes" },
+      },
     ],
   },
   {

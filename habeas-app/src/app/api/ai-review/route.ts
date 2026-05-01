@@ -14,16 +14,17 @@ For each suggestion, return an object with:
 - "suggestedValue": (optional) the improved text to replace the current value. Only include this for narrative/textarea fields where you can write better content.
 
 Rules:
-1. Flag EMPTY required fields as errors: petitionerName, detentionDate, facilityName, wardenName, immigrationCourtLocation
+1. Flag required fields as errors ONLY if the value is an empty string (""). The required fields are: petitionerName, detentionDate, facilityName, wardenName, immigrationCourtLocation. If a required field has ANY non-empty value, it is valid — do NOT flag it as placeholder, incomplete, or suspicious.
 2. Do NOT validate dates — all dates are correct as entered. Do NOT flag dates as being in the future or invalid.
-3. For narrative fields (familyDetails, spouseInfo, childrenInfo, usCitizenFamilyMembers, economicHarm, familialHarm, employmentDetails), if the content is too brief or could be more compelling for a federal court filing, suggest improved text that:
+3. For narrative fields (familyDetails, spouseInfo, childrenInfo, usCitizenFamilyMembers, economicHarm, familialHarm, employmentDetails, criminalHistoryDetails), if the content is too brief or could be more compelling for a federal court filing, suggest improved text that:
    - Uses specific, persuasive legal language
    - Emphasizes irreparable harm and due process concerns
    - Highlights ties to the community and family
    - Is written in third person about the petitioner
-4. Keep suggestions concise and actionable
-5. Return ONLY valid JSON: { "suggestions": [...] }
-6. If everything looks good, return { "suggestions": [] }`;
+4. If hasCriminalHistory is "yes", review criminalHistoryDetails for completeness and suggest improvements if needed. If hasCriminalHistory is "no", ignore criminalHistoryDetails.
+5. Keep suggestions concise and actionable
+6. Return ONLY valid JSON: { "suggestions": [...] }
+7. If everything looks good, return { "suggestions": [] }`;
 
 export async function POST(request: NextRequest) {
   const session = await auth();
