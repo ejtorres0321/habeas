@@ -1,3 +1,4 @@
+import { getEroFieldOfficeAddress } from "./eroFieldOffices";
 import {
   Document,
   Paragraph,
@@ -31,6 +32,8 @@ interface CaseData {
   facilityAddress: string;
   wardenName: string;
   wardenTitle: string;
+  fieldOfficeDirector: string;
+  eroFieldOffice: string;
 
   immigrationCourtLocation: string;
   nextHearingDate: string;
@@ -225,9 +228,9 @@ export function generateHabeasDocument(data: CaseData): Document {
               captionRow([normal(`${v(d.wardenName).toUpperCase()}, in ${v(d.wardenTitle, "his")} official capacity`)], []),
               captionRow([normal(`as ${v(d.wardenTitle, "Warden")} of the ${v(d.facilityName)} Detention Center;`)], []),
               captionRow([], []),
-              captionRow([normal("BRET BRADFORD, in his official capacity as")], []),
+              captionRow([normal(`${v(d.fieldOfficeDirector, "BRET BRADFORD").toUpperCase()}, in his official capacity as`)], []),
               captionRow([normal("Field Office Director of ICE Enforcement and")], []),
-              captionRow([normal("Removal Operations Houston Field Office;")], []),
+              captionRow([normal(`Removal Operations ${v(d.eroFieldOffice, "Houston Field Office")};`)], []),
               captionRow([], []),
               captionRow([normal("MARKWAYNE MULLIN, in his official capacity as")], []),
               captionRow([normal("Secretary of the Department of Homeland Security;")], []),
@@ -594,8 +597,8 @@ export function generateHabeasDocument(data: CaseData): Document {
 
           ...generateCertificateOfService(
             formatDate(d.serviceDateFieldOffice),
-            "Bret Bradford, in his Official Capacity as Field Office Director, of ICE Enforcement and Removal Operations Houston Field Office",
-            "(1) Office of the Field Office Director, Enforcement and Removal Operations, Houston Field Office, 126 Northpoint Drive, Houston, Texas 77060"
+            `${v(d.fieldOfficeDirector, "Bret Bradford")}, in his Official Capacity as Field Office Director, of ICE Enforcement and Removal Operations ${v(d.eroFieldOffice, "Houston Field Office")}`,
+            `(1) Office of the Field Office Director, Enforcement and Removal Operations, ${v(d.eroFieldOffice, "Houston Field Office")}, ${getEroFieldOfficeAddress(d.eroFieldOffice) || "126 Northpoint Drive, Houston, Texas 77060"}`
           ),
 
           ...generateCertificateOfService(

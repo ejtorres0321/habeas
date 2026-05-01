@@ -1,3 +1,5 @@
+import { eroFieldOffices } from "./eroFieldOffices";
+
 export interface CaseFormData {
   civilNo: string;
   status: "draft" | "filed" | "resolved";
@@ -13,6 +15,8 @@ export interface CaseFormData {
   facilityAddress: string;
   wardenName: string;
   wardenTitle: string;
+  fieldOfficeDirector: string;
+  eroFieldOffice: string;
 
   immigrationCourtLocation: string;
   nextHearingDate: string;
@@ -47,6 +51,8 @@ export const defaultCaseData: CaseFormData = {
   facilityAddress: "",
   wardenName: "",
   wardenTitle: "",
+  fieldOfficeDirector: "",
+  eroFieldOffice: "",
 
   immigrationCourtLocation: "",
   nextHearingDate: "",
@@ -120,6 +126,8 @@ export const formSections: { title: string; fields: FieldConfig[] }[] = [
     fields: [
       { key: "wardenName", label: "Warden Name", type: "text" },
       { key: "wardenTitle", label: "Warden Title", type: "text", placeholder: "e.g., Warden" },
+      { key: "fieldOfficeDirector", label: "Field Office Director", type: "text", placeholder: "e.g., Bret Bradford" },
+      { key: "eroFieldOffice", label: "ERO Field Office", type: "select", options: eroFieldOffices.map((o) => o.name) },
     ],
   },
   {

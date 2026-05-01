@@ -19,6 +19,8 @@ interface CaseData {
   facilityName: string;
   wardenName: string;
   wardenTitle: string;
+  fieldOfficeDirector: string;
+  eroFieldOffice: string;
   immigrationCourtLocation: string;
   nextHearingDate: string;
   reliefType: string;
@@ -146,9 +148,9 @@ export default function PreviewPage() {
                 <tr><td>as {v(data.wardenTitle, "Warden")} of the {v(data.facilityName)}</td><td>&sect;</td><td></td></tr>
                 <tr><td>Detention Center;</td><td>&sect;</td><td></td></tr>
                 <tr><td></td><td>&sect;</td><td></td></tr>
-                <tr><td>BRET BRADFORD, in his official capacity as</td><td>&sect;</td><td></td></tr>
+                <tr><td>{v(data.fieldOfficeDirector, "BRET BRADFORD").toUpperCase()}, in his official capacity as</td><td>&sect;</td><td></td></tr>
                 <tr><td>Field Office Director of ICE Enforcement and</td><td>&sect;</td><td></td></tr>
-                <tr><td>Removal Operations Houston Field Office;</td><td>&sect;</td><td></td></tr>
+                <tr><td>Removal Operations {v(data.eroFieldOffice, "Houston Field Office")};</td><td>&sect;</td><td></td></tr>
                 <tr><td></td><td>&sect;</td><td></td></tr>
                 <tr><td>MARKWAYNE MULLIN, in his official capacity</td><td>&sect;</td><td></td></tr>
                 <tr><td>as Secretary of the Department of Homeland</td><td>&sect;</td><td></td></tr>

@@ -23,6 +23,8 @@ export interface ICase extends Document {
   wardenName: string;
   wardenTitle: string;
   detentionCenterName: string;
+  fieldOfficeDirector: string;
+  eroFieldOffice: string;
 
   // Court / Proceedings
   immigrationCourtLocation: string;
@@ -80,6 +82,8 @@ const CaseSchema = new Schema<ICase>(
     wardenName: { type: String, default: "" },
     wardenTitle: { type: String, default: "" },
     detentionCenterName: { type: String, default: "" },
+    fieldOfficeDirector: { type: String, default: "" },
+    eroFieldOffice: { type: String, default: "" },
 
     immigrationCourtLocation: { type: String, default: "" },
     nextHearingDate: { type: String, default: "" },
