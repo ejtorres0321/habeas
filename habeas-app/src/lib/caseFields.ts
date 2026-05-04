@@ -27,6 +27,7 @@ export interface CaseFormData {
   usCitizenFamilyMembers: string;
   economicHarm: string;
   familialHarm: string;
+  petitionerGender: string;
   hasCriminalHistory: string;
   criminalHistoryDetails: string;
   employmentDetails: string;
@@ -65,6 +66,7 @@ export const defaultCaseData: CaseFormData = {
   usCitizenFamilyMembers: "",
   economicHarm: "",
   familialHarm: "",
+  petitionerGender: "male",
   hasCriminalHistory: "no",
   criminalHistoryDetails: "",
   employmentDetails: "",
@@ -103,6 +105,12 @@ export const formSections: { title: string; fields: FieldConfig[] }[] = [
     title: "Petitioner Information",
     fields: [
       { key: "petitionerName", label: "Petitioner Full Name", type: "text" },
+      {
+        key: "petitionerGender",
+        label: "Petitioner Gender",
+        type: "select",
+        options: ["male", "female"],
+      },
       { key: "petitionerAge", label: "Age", type: "text" },
       { key: "petitionerAddress", label: "Address", type: "text" },
       { key: "yearsInUS", label: "Years in the United States", type: "text" },

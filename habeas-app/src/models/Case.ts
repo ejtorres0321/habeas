@@ -41,6 +41,9 @@ export interface ICase extends Document {
   economicHarm: string;
   familialHarm: string;
 
+  // Petitioner Gender
+  petitionerGender: string;
+
   // Criminal History
   hasCriminalHistory: string;
   criminalHistoryDetails: string;
@@ -101,6 +104,7 @@ const CaseSchema = new Schema<ICase>(
     economicHarm: { type: String, default: "" },
     familialHarm: { type: String, default: "" },
 
+    petitionerGender: { type: String, default: "male" },
     hasCriminalHistory: { type: String, default: "no" },
     criminalHistoryDetails: { type: String, default: "" },
 

@@ -44,6 +44,7 @@ interface CaseData {
   usCitizenFamilyMembers: string;
   economicHarm: string;
   familialHarm: string;
+  petitionerGender: string;
   hasCriminalHistory: string;
   criminalHistoryDetails: string;
   employmentDetails: string;
@@ -173,6 +174,9 @@ function captionRow(leftRuns: TextRun[], rightRuns: TextRun[]): TableRow {
 export function generateHabeasDocument(data: CaseData): Document {
   const d = data;
   const hasCriminal = d.hasCriminalHistory === "yes";
+  const pro = d.petitionerGender === "female"
+    ? { subject: "she", Subject: "She", object: "her", possessive: "her", Possessive: "Her" }
+    : { subject: "he", Subject: "He", object: "him", possessive: "his", Possessive: "His" };
   let pn = 0;
   const p = () => String(++pn);
 
@@ -242,8 +246,8 @@ export function generateHabeasDocument(data: CaseData): Document {
 
     justified(
       normal(hasCriminal
-        ? `Petitioner has been detained by Immigration and Customs Enforcement (ICE) for ${v(d.monthsDetained)} months without any individualized determination that he presents a flight risk or danger to the community. He seeks immediate release or, at minimum, a hearing before a neutral decision-maker. Petitioner lived in the United States for ${v(d.yearsInUS)} years without ever being apprehended, detained, or placed in removal proceedings. During that time, he maintained stable employment and residence and built deep family ties in the United States. He was detained solely due to a change in government policy, with no change in his individual circumstances.`
-        : `Petitioner has been detained by Immigration and Customs Enforcement (ICE) for ${v(d.monthsDetained)} months without any individualized determination that he presents a flight risk or danger to the community. He seeks immediate release or, at minimum, a hearing before a neutral decision-maker. Petitioner lived in the United States for ${v(d.yearsInUS)} years without ever being apprehended, detained, or placed in removal proceedings. During that time, he maintained stable employment and residence, built deep family ties in the United States, and had zero criminal arrests, charges, or convictions. He was detained solely due to a change in government policy, with no change in his individual circumstances.`)
+        ? `Petitioner has been detained by Immigration and Customs Enforcement (ICE) for ${v(d.monthsDetained)} months without any individualized determination that ${pro.subject} presents a flight risk or danger to the community. ${pro.Subject} seeks immediate release or, at minimum, a hearing before a neutral decision-maker. Petitioner lived in the United States for ${v(d.yearsInUS)} years without ever being apprehended, detained, or placed in removal proceedings. During that time, ${pro.subject} maintained stable employment and residence and built deep family ties in the United States. ${pro.Subject} was detained solely due to a change in government policy, with no change in ${pro.possessive} individual circumstances.`
+        : `Petitioner has been detained by Immigration and Customs Enforcement (ICE) for ${v(d.monthsDetained)} months without any individualized determination that ${pro.subject} presents a flight risk or danger to the community. ${pro.Subject} seeks immediate release or, at minimum, a hearing before a neutral decision-maker. Petitioner lived in the United States for ${v(d.yearsInUS)} years without ever being apprehended, detained, or placed in removal proceedings. During that time, ${pro.subject} maintained stable employment and residence, built deep family ties in the United States, and had zero criminal arrests, charges, or convictions. ${pro.Subject} was detained solely due to a change in government policy, with no change in ${pro.possessive} individual circumstances.`)
     ),
 
     justified(
@@ -283,19 +287,19 @@ export function generateHabeasDocument(data: CaseData): Document {
 
     numberedPara(p(), normal(`Petitioner is ${v(d.petitionerAge)} years old and has resided in the United States for ${v(d.yearsInUS)} years, since ${v(d.yearOfEntry)}. See attached Exhibit A.`)),
 
-    numberedPara(p(), normal(`Petitioner and his family live at ${v(d.petitionerAddress)}.`)),
+    numberedPara(p(), normal(`Petitioner and ${pro.possessive} family live at ${v(d.petitionerAddress)}.`)),
 
     numberedPara(p(), normal(hasCriminal
       ? `Petitioner has ${v(d.criminalHistoryDetails, "a minor criminal citation")} and no history of immigration violations other than unlawful entry in ${v(d.yearOfEntry)}.`
       : `Petitioner has no criminal record and no history of immigration violations other than unlawful entry in ${v(d.yearOfEntry)}.`)),
 
-    numberedPara(p(), normal(`Prior to his detention on ${formatDate(d.detentionDate)}, Petitioner had never been apprehended, detained, or placed in removal proceedings by any immigration authority. He lived openly in the United States and had no prior ICE contact of any kind.`)),
+    numberedPara(p(), normal(`Prior to ${pro.possessive} detention on ${formatDate(d.detentionDate)}, Petitioner had never been apprehended, detained, or placed in removal proceedings by any immigration authority. ${pro.Subject} lived openly in the United States and had no prior ICE contact of any kind.`)),
 
     subSectionTitle("2. Detention Under \u00A71225(b)(2)(A)"),
 
-    numberedPara(p(), normal(`On ${formatDate(d.detentionDate)}, ICE apprehended Petitioner during ${v(d.apprehensionCircumstance)} and took him into custody.`)),
+    numberedPara(p(), normal(`On ${formatDate(d.detentionDate)}, ICE apprehended Petitioner during ${v(d.apprehensionCircumstance)} and took ${pro.object} into custody.`)),
 
-    numberedPara(p(), normal(`ICE asserts authority to detain Petitioner under 8 U.S.C. \u00A71225(b)(2)(A), claiming he is an \u201Capplicant for admission\u201D subject to mandatory detention based on his manner of entry ${v(d.yearsInUS)} years ago.`)),
+    numberedPara(p(), normal(`ICE asserts authority to detain Petitioner under 8 U.S.C. \u00A71225(b)(2)(A), claiming ${pro.subject} is an \u201Capplicant for admission\u201D subject to mandatory detention based on ${pro.possessive} manner of entry ${v(d.yearsInUS)} years ago.`)),
 
     numberedPara(p(), normal("ICE has provided no explanation for its decision to detain Petitioner, other than changed \u201Cpolicy\u201D following the Fifth Circuit\u2019s decision in "),
       italic("Buenrostro-Mendez v. Bondi"),
@@ -308,7 +312,7 @@ export function generateHabeasDocument(data: CaseData): Document {
 
     numberedPara(p(), normal(`Petitioner is in removal proceedings before the ${v(d.immigrationCourtLocation)} Immigration Court.`)),
 
-    numberedPara(p(), normal(`His next master calendar hearing is scheduled for ${formatDate(d.nextHearingDate)}. See attached Exhibit C: Automated Case Information. ICE has provided no timeline for completion of proceedings.`)),
+    numberedPara(p(), normal(`${pro.Possessive} next master calendar hearing is scheduled for ${formatDate(d.nextHearingDate)}. See attached Exhibit C: Automated Case Information. ICE has provided no timeline for completion of proceedings.`)),
 
     numberedPara(p(), normal(`Petitioner has applied for ${reliefText}.`)),
 
@@ -320,7 +324,7 @@ export function generateHabeasDocument(data: CaseData): Document {
 
     numberedPara(p(), bold("Familial Harm: "), normal(v(d.familialHarm, "Separation from spouse and children; spouse unable to work due to childcare responsibilities."))),
 
-    numberedPara(p(), bold("Inability to Defend Against Removal: "), normal("Petitioner is unable to gather documentary evidence for his relief application while in custody; he has limited access to his attorney while in ICE custody; he cannot locate witnesses or obtain declarations needed to defend his case.")),
+    numberedPara(p(), bold("Inability to Defend Against Removal: "), normal(`Petitioner is unable to gather documentary evidence for ${pro.possessive} relief application while in custody; ${pro.subject} has limited access to ${pro.possessive} attorney while in ICE custody; ${pro.subject} cannot locate witnesses or obtain declarations needed to defend ${pro.possessive} case.`)),
 
     numberedPara(p(), normal("Each day of continued detention exacerbates these harms.")),
   ];
@@ -361,7 +365,7 @@ export function generateHabeasDocument(data: CaseData): Document {
       normal(" at 701.")
     ),
 
-    numberedPara(p(), normal(`While Petitioner has been detained for ${v(d.monthsDetained)} months, he faces indefinite detention with no end in sight:`)),
+    numberedPara(p(), normal(`While Petitioner has been detained for ${v(d.monthsDetained)} months, ${pro.subject} faces indefinite detention with no end in sight:`)),
 
     subPara("a", normal("Section 1225(b)(2)(A) contains no temporal limitation whatsoever;")),
     subPara("b", normal("The statute provides for detention \u201Cpending a proceeding under section 1229a,\u201D which could last months or years;")),
@@ -369,17 +373,17 @@ export function generateHabeasDocument(data: CaseData): Document {
     subPara("d", normal("Cases involving applications for relief and appeal to the Board of Immigration Appeals routinely take 9\u201324+ months to resolve;")),
     subPara("e", normal("ICE has provided no timeline for completion of proceedings or release from detention.")),
 
-    numberedPara(p(), normal(`Even though Petitioner has been detained for \u201Conly\u201D ${v(d.monthsDetained)} months, the trajectory of his case makes clear he will be detained far beyond the six-month presumptively reasonable period absent intervention by this Court.`)),
+    numberedPara(p(), normal(`Even though Petitioner has been detained for \u201Conly\u201D ${v(d.monthsDetained)} months, the trajectory of ${pro.possessive} case makes clear ${pro.subject} will be detained far beyond the six-month presumptively reasonable period absent intervention by this Court.`)),
 
     numberedPara(p(), normal("Unlike the post-deportation/removal order detention at issue in "),
       italic("Zadvydas"),
       normal(", Petitioner\u2019s detention is even more troubling because:")
     ),
 
-    subPara("a", normal("He is detained during, not after, removal proceedings, when he is actively pursuing relief;")),
+    subPara("a", normal(`${pro.Subject} is detained during, not after, removal proceedings, when ${pro.subject} is actively pursuing relief;`)),
     subPara("b", normal("The proceedings themselves could last indefinitely;")),
-    subPara("c", normal("He has had no hearing whatsoever to determine the necessity of detention; and")),
-    subPara("d", normal("He faces categorical detention based on a recently-changed legal classification, not individualized facts.")),
+    subPara("c", normal(`${pro.Subject} has had no hearing whatsoever to determine the necessity of detention; and`)),
+    subPara("d", normal(`${pro.Subject} faces categorical detention based on a recently-changed legal classification, not individualized facts.`)),
 
     numberedPara(p(), normal("Respondents have made no individualized determination that Petitioner\u2019s continued detention is necessary to prevent flight or danger to the community, which are the only constitutionally permissible bases for preventive civil detention. "),
       italic("United States v. Salerno"),
@@ -391,14 +395,14 @@ export function generateHabeasDocument(data: CaseData): Document {
     subPara("a", normal(hasCriminal
       ? `Petitioner has resided in the United States for ${v(d.yearsInUS)} years with only ${v(d.criminalHistoryDetails, "a minor criminal citation")} which is not a violent or a crime of moral turpitude;`
       : `Petitioner has resided in the United States for ${v(d.yearsInUS)} years without a single criminal arrest, charge, or conviction;`)),
-    subPara("b", normal(`Petitioner maintained stable employment and residence throughout his time in the United States${d.employmentDetails && d.employmentDetails.trim() ? " " + d.employmentDetails.trim() : ""};`)),
+    subPara("b", normal(`Petitioner maintained stable employment and residence throughout ${pro.possessive} time in the United States${d.employmentDetails && d.employmentDetails.trim() ? " " + d.employmentDetails.trim() : ""};`)),
     subPara("c", normal(hasCriminal
       ? "Petitioner had zero violations of immigration condition;"
       : "Petitioner had zero violations of any law or immigration condition;")),
     subPara("d", normal(`Petitioner has deep family ties to the United States, including ${v(d.usCitizenFamilyMembers, "U.S. citizen/LPR family members")};`)),
     subPara("e", normal("No individualized assessment has ever identified Petitioner as a flight risk or danger.")),
 
-    numberedPara(p(), normal("Petitioner\u2019s detention is purely categorical, based solely on his legal classification as an \u201Capplicant for admission\u201D\u2014not on any individualized finding that he personally requires detention.")),
+    numberedPara(p(), normal(`Petitioner\u2019s detention is purely categorical, based solely on ${pro.possessive} legal classification as an \u201Capplicant for admission\u201D\u2014not on any individualized finding that ${pro.subject} personally requires detention.`)),
 
     numberedPara(p(), normal("This categorical, indefinite detention without individualized determination violates substantive due process.")),
 
@@ -417,26 +421,26 @@ export function generateHabeasDocument(data: CaseData): Document {
       normal(" balancing test here, the constitutional scales tip overwhelmingly in favor of providing Petitioner a hearing.")
     ),
 
-    numberedPara(p(), bold("First Factor: Private Interest. "), normal("Petitioner\u2019s private interest is among the most fundamental protected by the Constitution\u2014physical liberty and the ability to remain with his family.")),
+    numberedPara(p(), bold("First Factor: Private Interest. "), normal(`Petitioner\u2019s private interest is among the most fundamental protected by the Constitution\u2014physical liberty and the ability to remain with ${pro.possessive} family.`)),
 
     numberedPara(p(), bold("Second Factor: Risk of Erroneous Deprivation. "), normal("The risk of erroneous deprivation here is not merely substantial\u2014it is 100%.")),
 
     numberedPara(p(), bold("Third Factor: Government Interest. "), normal(hasCriminal
-      ? "The government\u2019s interests are preventing flight and protecting public safety. However, these interests are not served by detaining someone who has proven through years of peaceful residence that he will appear and poses no danger."
-      : "The government\u2019s interests are preventing flight and protecting public safety. However, these interests are not served by detaining someone who has proven through years of law-abiding conduct that he will appear and poses no danger.")),
+      ? `The government\u2019s interests are preventing flight and protecting public safety. However, these interests are not served by detaining someone who has proven through years of peaceful residence that ${pro.subject} will appear and poses no danger.`
+      : `The government\u2019s interests are preventing flight and protecting public safety. However, these interests are not served by detaining someone who has proven through years of law-abiding conduct that ${pro.subject} will appear and poses no danger.`)),
 
     numberedPara(p(), normal("The "),
       italic("Mathews"),
-      normal(" balancing test overwhelmingly favors providing Petitioner a hearing before a neutral decision-maker with authority to order release upon a showing that he is not a flight risk or danger.")
+      normal(` balancing test overwhelmingly favors providing Petitioner a hearing before a neutral decision-maker with authority to order release upon a showing that ${pro.subject} is not a flight risk or danger.`)
     ),
 
     numberedPara(p(), normal("At minimum, due process requires:")),
     subPara("a", normal("Notice of the reasons for continued detention;")),
     subPara("b", normal("An opportunity to present evidence that Petitioner is neither a flight risk nor a danger to the community;")),
     subPara("c", normal("A hearing before a neutral decision-maker (not ICE, which is the prosecuting/detaining authority); and")),
-    subPara("d", normal("Authority in that decision-maker to order release on bond or conditions if Petitioner meets his burden.")),
+    subPara("d", normal(`Authority in that decision-maker to order release on bond or conditions if Petitioner meets ${pro.possessive} burden.`)),
 
-    numberedPara(p(), normal("Respondents have provided none of these procedural protections. Petitioner has received no hearing, no opportunity to present evidence of his ties and compliance, and no review by any neutral arbiter.")),
+    numberedPara(p(), normal(`Respondents have provided none of these procedural protections. Petitioner has received no hearing, no opportunity to present evidence of ${pro.possessive} ties and compliance, and no review by any neutral arbiter.`)),
 
     numberedPara(p(), normal("This complete deprivation of process violates the Fifth Amendment.")),
 
@@ -472,9 +476,9 @@ export function generateHabeasDocument(data: CaseData): Document {
       normal(", 523 U.S. 833, 845\u201346 (1998).")
     ),
 
-    numberedPara(p(), normal(`The government\u2019s sudden decision to detain Petitioner after ${v(d.yearsInUS)} years of non-enforcement, with no change whatsoever in his individual circumstances, constitutes arbitrary government action.`)),
+    numberedPara(p(), normal(`The government\u2019s sudden decision to detain Petitioner after ${v(d.yearsInUS)} years of non-enforcement, with no change whatsoever in ${pro.possessive} individual circumstances, constitutes arbitrary government action.`)),
 
-    numberedPara(p(), normal(`During ${v(d.yearsInUS)} years of physical presence in the United States, Petitioner built an established life in reasonable reliance on his circumstances.`)),
+    numberedPara(p(), normal(`During ${v(d.yearsInUS)} years of physical presence in the United States, Petitioner built an established life in reasonable reliance on ${pro.possessive} circumstances.`)),
 
     numberedPara(p(), normal(hasCriminal
       ? `The government\u2019s prolonged non-enforcement over ${v(d.yearsInUS)} years demonstrates that Petitioner presents no flight risk or danger. `
@@ -483,7 +487,7 @@ export function generateHabeasDocument(data: CaseData): Document {
       normal(", 481 U.S. at 748.")
     ),
 
-    numberedPara(p(), normal("Now, with no change in Petitioner\u2019s individual circumstances, the government has detained him based solely on a policy change following "),
+    numberedPara(p(), normal(`Now, with no change in Petitioner\u2019s individual circumstances, the government has detained ${pro.object} based solely on a policy change following `),
       italic("Buenrostro-Mendez"),
       normal(". This is the paradigm of arbitrary action.")
     ),
@@ -529,7 +533,7 @@ export function generateHabeasDocument(data: CaseData): Document {
     subPara("a", normal("Declare that Petitioner\u2019s continued detention violates the Fifth Amendment to the United States Constitution;")),
     subPara("b", normal("Issue a Writ of Habeas Corpus ordering Petitioner\u2019s immediate release from custody, subject to reasonable conditions of supervision including GPS monitoring, regular ICE check-ins, surrender of travel documents, and/or reasonable bond;")),
     subPara("c", normal("Alternatively, order Respondents to provide Petitioner with an individualized hearing before a neutral decision-maker within seven (7) days;")),
-    subPara("d", normal("Enjoin Respondents from continuing to detain Petitioner in violation of his constitutional rights;")),
+    subPara("d", normal(`Enjoin Respondents from continuing to detain Petitioner in violation of ${pro.possessive} constitutional rights;`)),
     subPara("e", normal("Order a stay of removal proceedings pending resolution of this petition;")),
     subPara("f", normal("Award costs and attorney\u2019s fees pursuant to 28 U.S.C. \u00A72412 and other applicable law; and")),
     subPara("g", normal("Grant such other and further relief as the Court deems just and proper.")),

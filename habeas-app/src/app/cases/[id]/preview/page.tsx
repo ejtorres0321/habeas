@@ -29,6 +29,7 @@ interface CaseData {
   usCitizenFamilyMembers: string;
   economicHarm: string;
   familialHarm: string;
+  petitionerGender: string;
   hasCriminalHistory: string;
   criminalHistoryDetails: string;
   employmentDetails: string;
@@ -250,6 +251,9 @@ export default function PreviewPage() {
   }
 
   const hasCriminal = data.hasCriminalHistory === "yes";
+  const pro = data.petitionerGender === "female"
+    ? { subject: "she", Subject: "She", object: "her", possessive: "her", Possessive: "Her" }
+    : { subject: "he", Subject: "He", object: "him", possessive: "his", Possessive: "His" };
   const reliefText = data.reliefType === "both"
     ? "asylum / cancellation of removal under 8 U.S.C. \u00A71229b(b)"
     : v(data.reliefType, "asylum / cancellation of removal under 8 U.S.C. \u00A71229b(b)");
@@ -457,8 +461,8 @@ export default function PreviewPage() {
 
               <p className="text-justify indent-8 mb-4">
                 {hasCriminal
-                  ? `Petitioner has been detained by Immigration and Customs Enforcement (ICE) for ${v(data.monthsDetained)} months without any individualized determination that he presents a flight risk or danger to the community. He seeks immediate release or, at minimum, a hearing before a neutral decision-maker. Petitioner lived in the United States for ${v(data.yearsInUS)} years without ever being apprehended, detained, or placed in removal proceedings. During that time, he maintained stable employment and residence and built deep family ties in the United States. He was detained solely due to a change in government policy, with no change in his individual circumstances.`
-                  : `Petitioner has been detained by Immigration and Customs Enforcement (ICE) for ${v(data.monthsDetained)} months without any individualized determination that he presents a flight risk or danger to the community. He seeks immediate release or, at minimum, a hearing before a neutral decision-maker. Petitioner lived in the United States for ${v(data.yearsInUS)} years without ever being apprehended, detained, or placed in removal proceedings. During that time, he maintained stable employment and residence, built deep family ties in the United States, and had zero criminal arrests, charges, or convictions. He was detained solely due to a change in government policy, with no change in his individual circumstances.`}
+                  ? `Petitioner has been detained by Immigration and Customs Enforcement (ICE) for ${v(data.monthsDetained)} months without any individualized determination that ${pro.subject} presents a flight risk or danger to the community. ${pro.Subject} seeks immediate release or, at minimum, a hearing before a neutral decision-maker. Petitioner lived in the United States for ${v(data.yearsInUS)} years without ever being apprehended, detained, or placed in removal proceedings. During that time, ${pro.subject} maintained stable employment and residence and built deep family ties in the United States. ${pro.Subject} was detained solely due to a change in government policy, with no change in ${pro.possessive} individual circumstances.`
+                  : `Petitioner has been detained by Immigration and Customs Enforcement (ICE) for ${v(data.monthsDetained)} months without any individualized determination that ${pro.subject} presents a flight risk or danger to the community. ${pro.Subject} seeks immediate release or, at minimum, a hearing before a neutral decision-maker. Petitioner lived in the United States for ${v(data.yearsInUS)} years without ever being apprehended, detained, or placed in removal proceedings. During that time, ${pro.subject} maintained stable employment and residence, built deep family ties in the United States, and had zero criminal arrests, charges, or convictions. ${pro.Subject} was detained solely due to a change in government policy, with no change in ${pro.possessive} individual circumstances.`}
               </p>
 
               <p className="text-justify indent-8 mb-4">
@@ -491,18 +495,18 @@ export default function PreviewPage() {
               <h3 className="font-bold ml-8 mb-3">1. Background and Family Ties</h3>
 
               <p className="indent-8 mb-3">{p()}. Petitioner is {v(data.petitionerAge)} years old and has resided in the United States for {v(data.yearsInUS)} years, since {v(data.yearOfEntry)}. See attached Exhibit A.</p>
-              <p className="indent-8 mb-3">{p()}. Petitioner and his family live at {v(data.petitionerAddress)}.</p>
+              <p className="indent-8 mb-3">{p()}. Petitioner and {pro.possessive} family live at {v(data.petitionerAddress)}.</p>
               <p className="indent-8 mb-3 text-justify">{p()}. {hasCriminal
                 ? `Petitioner has ${v(data.criminalHistoryDetails, "a minor criminal citation")} and no history of immigration violations other than unlawful entry in ${v(data.yearOfEntry)}.`
                 : `Petitioner has no criminal record and no history of immigration violations other than unlawful entry in ${v(data.yearOfEntry)}.`}</p>
-              <p className="indent-8 mb-3 text-justify">{p()}. Prior to his detention on {formatDate(data.detentionDate)}, Petitioner had never been apprehended, detained, or placed in removal proceedings by any immigration authority. He lived openly in the United States and had no prior ICE contact of any kind.</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. Prior to {pro.possessive} detention on {formatDate(data.detentionDate)}, Petitioner had never been apprehended, detained, or placed in removal proceedings by any immigration authority. {pro.Subject} lived openly in the United States and had no prior ICE contact of any kind.</p>
             </div>
 
             <div id="facts-2">
               <h3 className="font-bold ml-8 mb-3">2. Detention Under &sect;1225(b)(2)(A)</h3>
 
-              <p className="indent-8 mb-3">{p()}. On {formatDate(data.detentionDate)}, ICE apprehended Petitioner during {v(data.apprehensionCircumstance)} and took him into custody.</p>
-              <p className="indent-8 mb-3 text-justify">{p()}. ICE asserts authority to detain Petitioner under 8 U.S.C. &sect;1225(b)(2)(A), claiming he is an &ldquo;applicant for admission&rdquo; subject to mandatory detention based on his manner of entry {v(data.yearsInUS)} years ago.</p>
+              <p className="indent-8 mb-3">{p()}. On {formatDate(data.detentionDate)}, ICE apprehended Petitioner during {v(data.apprehensionCircumstance)} and took {pro.object} into custody.</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. ICE asserts authority to detain Petitioner under 8 U.S.C. &sect;1225(b)(2)(A), claiming {pro.subject} is an &ldquo;applicant for admission&rdquo; subject to mandatory detention based on {pro.possessive} manner of entry {v(data.yearsInUS)} years ago.</p>
               <p className="indent-8 mb-3 text-justify">{p()}. ICE has provided no explanation for its decision to detain Petitioner, other than changed &ldquo;policy&rdquo; following the Fifth Circuit&rsquo;s decision in <em>Buenrostro-Mendez v. Bondi</em>, No. 25-20496 (5th Cir. Feb. 6, 2026).</p>
               <p className="indent-8 mb-3 text-justify">{p()}. Petitioner has been continuously detained at {v(data.facilityName)} since {formatDate(data.detentionDate)}&mdash;a total of {v(data.monthsDetained)} months to date. See attached Exhibit B: Detainee Locator.</p>
             </div>
@@ -511,7 +515,7 @@ export default function PreviewPage() {
               <h3 className="font-bold ml-8 mb-3">3. Current Removal Proceedings and Likelihood of Relief</h3>
 
               <p className="indent-8 mb-3">{p()}. Petitioner is in removal proceedings before the {v(data.immigrationCourtLocation)} Immigration Court.</p>
-              <p className="indent-8 mb-3 text-justify">{p()}. His next master calendar hearing is scheduled for {formatDate(data.nextHearingDate)}. See attached Exhibit C: Automated Case Information. ICE has provided no timeline for completion of proceedings.</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. {pro.Possessive} next master calendar hearing is scheduled for {formatDate(data.nextHearingDate)}. See attached Exhibit C: Automated Case Information. ICE has provided no timeline for completion of proceedings.</p>
               <p className="indent-8 mb-3">{p()}. Petitioner has applied for {reliefText}.</p>
             </div>
 
@@ -521,7 +525,7 @@ export default function PreviewPage() {
               <p className="indent-8 mb-3">{p()}. Petitioner&rsquo;s continued detention causes severe and irreparable harm.</p>
               <p className="indent-8 mb-3 text-justify">{p()}. <strong>Economic Harm:</strong> {v(data.economicHarm, "Loss of employment and income; family unable to pay rent or mortgage and facing eviction/foreclosure.")}</p>
               <p className="indent-8 mb-3 text-justify">{p()}. <strong>Familial Harm:</strong> {v(data.familialHarm, "Separation from spouse and children; spouse unable to work due to childcare responsibilities.")}</p>
-              <p className="indent-8 mb-3 text-justify">{p()}. <strong>Inability to Defend Against Removal:</strong> Petitioner is unable to gather documentary evidence for his relief application while in custody; he has limited access to his attorney while in ICE custody; he cannot locate witnesses or obtain declarations needed to defend his case.</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. <strong>Inability to Defend Against Removal:</strong> Petitioner is unable to gather documentary evidence for {pro.possessive} relief application while in custody; {pro.subject} has limited access to {pro.possessive} attorney while in ICE custody; {pro.subject} cannot locate witnesses or obtain declarations needed to defend {pro.possessive} case.</p>
               <p className="indent-8 mb-3">{p()}. Each day of continued detention exacerbates these harms.</p>
             </div>
 
@@ -543,7 +547,7 @@ export default function PreviewPage() {
               <p className="indent-8 mb-3 text-justify">{p()}. The Supreme Court has held that indefinite or prolonged civil detention raises &ldquo;serious constitutional concerns.&rdquo; <em>Zadvydas</em>, 533 U.S. at 690.</p>
               <p className="indent-8 mb-3 text-justify">{p()}. To avoid these concerns, the Supreme Court has &ldquo;read an implicit limitation&rdquo; into immigration detention statutes requiring individualized determinations and temporal limits. <em>Id.</em> at 689.</p>
               <p className="indent-8 mb-3 text-justify">{p()}. The Supreme Court identified six months as a &ldquo;presumptively reasonable period&rdquo; for immigration detention. <em>Id.</em> at 701.</p>
-              <p className="indent-8 mb-3 text-justify">{p()}. While Petitioner has been detained for {v(data.monthsDetained)} months, he faces indefinite detention with no end in sight:</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. While Petitioner has been detained for {v(data.monthsDetained)} months, {pro.subject} faces indefinite detention with no end in sight:</p>
 
               <p className="ml-12 mb-2 text-justify">a. Section 1225(b)(2)(A) contains no temporal limitation whatsoever;</p>
               <p className="ml-12 mb-2 text-justify">b. The statute provides for detention &ldquo;pending a proceeding under section 1229a,&rdquo; which could last months or years;</p>
@@ -551,14 +555,14 @@ export default function PreviewPage() {
               <p className="ml-12 mb-2 text-justify">d. Cases involving applications for relief and appeal to the Board of Immigration Appeals routinely take 9&ndash;24+ months to resolve;</p>
               <p className="ml-12 mb-2 text-justify">e. ICE has provided no timeline for completion of proceedings or release from detention.</p>
 
-              <p className="indent-8 mb-3 text-justify">{p()}. Even though Petitioner has been detained for &ldquo;only&rdquo; {v(data.monthsDetained)} months, the trajectory of his case makes clear he will be detained far beyond the six-month presumptively reasonable period absent intervention by this Court.</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. Even though Petitioner has been detained for &ldquo;only&rdquo; {v(data.monthsDetained)} months, the trajectory of {pro.possessive} case makes clear {pro.subject} will be detained far beyond the six-month presumptively reasonable period absent intervention by this Court.</p>
 
               <p className="indent-8 mb-3 text-justify">{p()}. Unlike the post-deportation/removal order detention at issue in <em>Zadvydas</em>, Petitioner&rsquo;s detention is even more troubling because:</p>
 
-              <p className="ml-12 mb-2 text-justify">a. He is detained during, not after, removal proceedings, when he is actively pursuing relief;</p>
+              <p className="ml-12 mb-2 text-justify">a. {pro.Subject} is detained during, not after, removal proceedings, when {pro.subject} is actively pursuing relief;</p>
               <p className="ml-12 mb-2 text-justify">b. The proceedings themselves could last indefinitely;</p>
-              <p className="ml-12 mb-2 text-justify">c. He has had no hearing whatsoever to determine the necessity of detention; and</p>
-              <p className="ml-12 mb-2 text-justify">d. He faces categorical detention based on a recently-changed legal classification, not individualized facts.</p>
+              <p className="ml-12 mb-2 text-justify">c. {pro.Subject} has had no hearing whatsoever to determine the necessity of detention; and</p>
+              <p className="ml-12 mb-2 text-justify">d. {pro.Subject} faces categorical detention based on a recently-changed legal classification, not individualized facts.</p>
 
               <p className="indent-8 mb-3 text-justify">{p()}. Respondents have made no individualized determination that Petitioner&rsquo;s continued detention is necessary to prevent flight or danger to the community, which are the only constitutionally permissible bases for preventive civil detention. <em>United States v. Salerno</em>, 481 U.S. 739, 748 (1987).</p>
 
@@ -567,14 +571,14 @@ export default function PreviewPage() {
               <p className="ml-12 mb-2 text-justify">a. {hasCriminal
                 ? `Petitioner has resided in the United States for ${v(data.yearsInUS)} years with only ${v(data.criminalHistoryDetails, "a minor criminal citation")} which is not a violent or a crime of moral turpitude;`
                 : `Petitioner has resided in the United States for ${v(data.yearsInUS)} years without a single criminal arrest, charge, or conviction;`}</p>
-              <p className="ml-12 mb-2 text-justify">b. Petitioner maintained stable employment and residence throughout his time in the United States{data.employmentDetails && data.employmentDetails.trim() ? ` ${data.employmentDetails.trim()}` : ""};</p>
+              <p className="ml-12 mb-2 text-justify">b. Petitioner maintained stable employment and residence throughout {pro.possessive} time in the United States{data.employmentDetails && data.employmentDetails.trim() ? ` ${data.employmentDetails.trim()}` : ""};</p>
               <p className="ml-12 mb-2 text-justify">c. {hasCriminal
                 ? "Petitioner had zero violations of immigration condition;"
                 : "Petitioner had zero violations of any law or immigration condition;"}</p>
               <p className="ml-12 mb-2 text-justify">d. Petitioner has deep family ties to the United States, including {v(data.usCitizenFamilyMembers, "U.S. citizen/LPR family members")};</p>
               <p className="ml-12 mb-2 text-justify">e. No individualized assessment has ever identified Petitioner as a flight risk or danger.</p>
 
-              <p className="indent-8 mb-3 text-justify">{p()}. Petitioner&rsquo;s detention is purely categorical, based solely on his legal classification as an &ldquo;applicant for admission&rdquo;&mdash;not on any individualized finding that he personally requires detention.</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. Petitioner&rsquo;s detention is purely categorical, based solely on {pro.possessive} legal classification as an &ldquo;applicant for admission&rdquo;&mdash;not on any individualized finding that {pro.subject} personally requires detention.</p>
               <p className="indent-8 mb-3">{p()}. This categorical, indefinite detention without individualized determination violates substantive due process.</p>
             </div>
 
@@ -585,20 +589,20 @@ export default function PreviewPage() {
               <p className="indent-8 mb-3 text-justify">{p()}. The Fifth Amendment requires meaningful procedural protections before deprivation of physical liberty&mdash;one of the most fundamental interests protected by the Constitution.</p>
               <p className="indent-8 mb-3 text-justify">{p()}. Under <em>Mathews v. Eldridge</em>, 424 U.S. 319, 335 (1976), courts apply a three-part balancing test to determine what process is due: (1) the private interest affected by government action; (2) the risk of erroneous deprivation through procedures used and the probable value of additional safeguards; and (3) the government&rsquo;s interest, including the fiscal and administrative burdens of additional procedures.</p>
               <p className="indent-8 mb-3 text-justify">{p()}. Applying the <em>Mathews</em> balancing test here, the constitutional scales tip overwhelmingly in favor of providing Petitioner a hearing.</p>
-              <p className="indent-8 mb-3 text-justify">{p()}. <strong>First Factor: Private Interest.</strong> Petitioner&rsquo;s private interest is among the most fundamental protected by the Constitution&mdash;physical liberty and the ability to remain with his family.</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. <strong>First Factor: Private Interest.</strong> Petitioner&rsquo;s private interest is among the most fundamental protected by the Constitution&mdash;physical liberty and the ability to remain with {pro.possessive} family.</p>
               <p className="indent-8 mb-3 text-justify">{p()}. <strong>Second Factor: Risk of Erroneous Deprivation.</strong> The risk of erroneous deprivation here is not merely substantial&mdash;it is 100%.</p>
               <p className="indent-8 mb-3 text-justify">{p()}. <strong>Third Factor: Government Interest.</strong> {hasCriminal
-                ? "The government\u2019s interests are preventing flight and protecting public safety. However, these interests are not served by detaining someone who has proven through years of peaceful residence that he will appear and poses no danger."
-                : "The government\u2019s interests are preventing flight and protecting public safety. However, these interests are not served by detaining someone who has proven through years of law-abiding conduct that he will appear and poses no danger."}</p>
-              <p className="indent-8 mb-3 text-justify">{p()}. The <em>Mathews</em> balancing test overwhelmingly favors providing Petitioner a hearing before a neutral decision-maker with authority to order release upon a showing that he is not a flight risk or danger.</p>
+                ? `The government\u2019s interests are preventing flight and protecting public safety. However, these interests are not served by detaining someone who has proven through years of peaceful residence that ${pro.subject} will appear and poses no danger.`
+                : `The government\u2019s interests are preventing flight and protecting public safety. However, these interests are not served by detaining someone who has proven through years of law-abiding conduct that ${pro.subject} will appear and poses no danger.`}</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. The <em>Mathews</em> balancing test overwhelmingly favors providing Petitioner a hearing before a neutral decision-maker with authority to order release upon a showing that {pro.subject} is not a flight risk or danger.</p>
 
               <p className="indent-8 mb-3">{p()}. At minimum, due process requires:</p>
               <p className="ml-12 mb-2">a. Notice of the reasons for continued detention;</p>
               <p className="ml-12 mb-2">b. An opportunity to present evidence that Petitioner is neither a flight risk nor a danger to the community;</p>
               <p className="ml-12 mb-2">c. A hearing before a neutral decision-maker (not ICE, which is the prosecuting/detaining authority); and</p>
-              <p className="ml-12 mb-2 text-justify">d. Authority in that decision-maker to order release on bond or conditions if Petitioner meets his burden.</p>
+              <p className="ml-12 mb-2 text-justify">d. Authority in that decision-maker to order release on bond or conditions if Petitioner meets {pro.possessive} burden.</p>
 
-              <p className="indent-8 mb-3 text-justify">{p()}. Respondents have provided none of these procedural protections. Petitioner has received no hearing, no opportunity to present evidence of his ties and compliance, and no review by any neutral arbiter.</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. Respondents have provided none of these procedural protections. Petitioner has received no hearing, no opportunity to present evidence of {pro.possessive} ties and compliance, and no review by any neutral arbiter.</p>
               <p className="indent-8 mb-3">{p()}. This complete deprivation of process violates the Fifth Amendment.</p>
             </div>
 
@@ -622,13 +626,13 @@ export default function PreviewPage() {
               <h3 className="font-bold ml-8 mb-3">D. Arbitrary and Capricious Government Action: Detention After Prolonged Non-Enforcement</h3>
 
               <p className="indent-8 mb-3 text-justify">{p()}. The Due Process Clause prohibits arbitrary government action. <em>County of Sacramento v. Lewis</em>, 523 U.S. 833, 845&ndash;46 (1998).</p>
-              <p className="indent-8 mb-3 text-justify">{p()}. The government&rsquo;s sudden decision to detain Petitioner after {v(data.yearsInUS)} years of non-enforcement, with no change whatsoever in his individual circumstances, constitutes arbitrary government action.</p>
-              <p className="indent-8 mb-3 text-justify">{p()}. During {v(data.yearsInUS)} years of physical presence in the United States, Petitioner built an established life in reasonable reliance on his circumstances.</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. The government&rsquo;s sudden decision to detain Petitioner after {v(data.yearsInUS)} years of non-enforcement, with no change whatsoever in {pro.possessive} individual circumstances, constitutes arbitrary government action.</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. During {v(data.yearsInUS)} years of physical presence in the United States, Petitioner built an established life in reasonable reliance on {pro.possessive} circumstances.</p>
               <p className="indent-8 mb-3 text-justify">{p()}. {hasCriminal
                 ? `The government\u2019s prolonged non-enforcement over ${v(data.yearsInUS)} years demonstrates that Petitioner presents no flight risk or danger. `
                 : `The government\u2019s prolonged non-enforcement over ${v(data.yearsInUS)} years, combined with Petitioner\u2019s complete compliance with all applicable laws during that period, demonstrates that Petitioner presents no flight risk or danger. `}
                 <em>Salerno</em>, 481 U.S. at 748.</p>
-              <p className="indent-8 mb-3 text-justify">{p()}. Now, with no change in Petitioner&rsquo;s individual circumstances, the government has detained him based solely on a policy change following <em>Buenrostro-Mendez</em>. This is the paradigm of arbitrary action.</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. Now, with no change in Petitioner&rsquo;s individual circumstances, the government has detained {pro.object} based solely on a policy change following <em>Buenrostro-Mendez</em>. This is the paradigm of arbitrary action.</p>
               <p className="indent-8 mb-3 text-justify">{p()}. While the Fifth Circuit has not recognized a formal doctrine of &ldquo;non-enforcement acquiescence&rdquo; in the immigration detention context, the due process prohibition on arbitrary government action provides an independent basis for relief. See <em>Lewis</em>, 523 U.S. at 845&ndash;46.</p>
               <p className="indent-8 mb-3 text-justify">{p()}. This arbitrary detention, premised solely on a policy change and Petitioner&rsquo;s manner of entry {v(data.yearsInUS)} years ago rather than any current, individualized assessment, violates the Fifth Amendment&rsquo;s due process guarantee.</p>
             </div>
@@ -665,7 +669,7 @@ export default function PreviewPage() {
               <p className="ml-12 mb-2 text-justify">a. Declare that Petitioner&rsquo;s continued detention violates the Fifth Amendment to the United States Constitution;</p>
               <p className="ml-12 mb-2 text-justify">b. Issue a Writ of Habeas Corpus ordering Petitioner&rsquo;s immediate release from custody, subject to reasonable conditions of supervision including GPS monitoring, regular ICE check-ins, surrender of travel documents, and/or reasonable bond;</p>
               <p className="ml-12 mb-2 text-justify">c. Alternatively, order Respondents to provide Petitioner with an individualized hearing before a neutral decision-maker within seven (7) days;</p>
-              <p className="ml-12 mb-2 text-justify">d. Enjoin Respondents from continuing to detain Petitioner in violation of his constitutional rights;</p>
+              <p className="ml-12 mb-2 text-justify">d. Enjoin Respondents from continuing to detain Petitioner in violation of {pro.possessive} constitutional rights;</p>
               <p className="ml-12 mb-2">e. Order a stay of removal proceedings pending resolution of this petition;</p>
               <p className="ml-12 mb-2 text-justify">f. Award costs and attorney&rsquo;s fees pursuant to 28 U.S.C. &sect;2412 and other applicable law; and</p>
               <p className="ml-12 mb-2">g. Grant such other and further relief as the Court deems just and proper.</p>
