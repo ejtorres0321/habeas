@@ -200,7 +200,13 @@ export default function PreviewPage() {
   async function handleDownload() {
     setDownloading(true);
     try {
-      const res = await fetch(`/api/cases/${id}/docx`);
+      const currentHTML = documentTextRef.current?.innerHTML || "";
+      const res = await fetch(`/api/cases/${id}/docx`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ html: currentHTML }),
+      });
+      if (!res.ok) throw new Error("Download failed");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
