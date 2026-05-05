@@ -200,27 +200,7 @@ export default function PreviewPage() {
   async function handleDownload() {
     setDownloading(true);
     try {
-      const currentHTML = documentTextRef.current?.innerHTML || "";
-      const res = await fetch(`/api/cases/${id}/docx`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ html: currentHTML }),
-      });
-      if (!res.ok) {
-        // Fallback: try GET endpoint (generates from structured data)
-        const fallback = await fetch(`/api/cases/${id}/docx`);
-        if (!fallback.ok) throw new Error("Download failed");
-        const blob = await fallback.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = data?.petitionerName
-          ? `Habeas_Corpus_${data.petitionerName.replace(/\s+/g, "_")}.docx`
-          : "Habeas_Corpus_Petition.docx";
-        a.click();
-        URL.revokeObjectURL(url);
-        return;
-      }
+      const res = await fetch(`/api/cases/${id}/docx`);
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
