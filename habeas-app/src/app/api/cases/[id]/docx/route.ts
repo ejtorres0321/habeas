@@ -4,8 +4,6 @@ import Case from "@/models/Case";
 import { generateHabeasDocument } from "@/lib/generateDocument";
 import { Packer } from "docx";
 import { auth } from "@/auth";
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const HTMLtoDOCX = require("html-to-docx");
 
 /** Tailwind class → inline CSS mapping for DOCX conversion */
 const twMap: Record<string, string> = {
@@ -36,24 +34,73 @@ const twMap: Record<string, string> = {
   "font-serif": "font-family:'Times New Roman',Times,serif",
 };
 
-/** Convert Tailwind class attributes to inline styles */
+/** Convert Tailwind class attributes to inline styles, merging with existing style attrs */
 function tailwindToInline(html: string): string {
-  return html.replace(/\bclass="([^"]*)"/g, (_match, classes: string) => {
-    const classList = classes.split(/\s+/).filter(Boolean);
-    const styles: string[] = [];
-    const remaining: string[] = [];
-    for (const cls of classList) {
-      if (twMap[cls] !== undefined) {
-        if (twMap[cls]) styles.push(twMap[cls]);
-      } else {
-        remaining.push(cls);
+  // First pass: convert class→style, appending to any existing style attribute
+  let result = html.replace(
+    /(<[^>]*?)\bclass="([^"]*)"([^>]*>)/g,
+    (_match, before: string, classes: string, after: string) => {
+      const classList = classes.split(/\s+/).filter(Boolean);
+      const newStyles: string[] = [];
+      const remaining: string[] = [];
+      for (const cls of classList) {
+        if (twMap[cls] !== undefined) {
+          if (twMap[cls]) newStyles.push(twMap[cls]);
+        } else {
+          remaining.push(cls);
+        }
       }
+      // Check if tag already has a style attribute
+      const full = before + after;
+      const existingStyle = full.match(/style="([^"]*)"/);
+      if (existingStyle && newStyles.length) {
+        // Merge: append new styles to existing
+        const merged = existingStyle[1].replace(/;?\s*$/, "") + ";" + newStyles.join(";");
+        const updatedBefore = before.replace(/style="[^"]*"/, `style="${merged}"`);
+        const updatedAfter = after.replace(/style="[^"]*"/, `style="${merged}"`);
+        const classAttr = remaining.length ? `class="${remaining.join(" ")}"` : "";
+        return updatedBefore + classAttr + updatedAfter;
+      }
+      const parts: string[] = [];
+      if (newStyles.length) parts.push(`style="${newStyles.join(";")}"`);
+      if (remaining.length) parts.push(`class="${remaining.join(" ")}"`);
+      return before + (parts.length ? parts.join(" ") : "") + after;
     }
-    const parts: string[] = [];
-    if (styles.length) parts.push(`style="${styles.join(";")}"`);
-    if (remaining.length) parts.push(`class="${remaining.join(" ")}"`);
-    return parts.join(" ") || "";
+  );
+  // Strip leftover empty class attributes
+  result = result.replace(/\s*class=""\s*/g, " ");
+  return result;
+}
+
+/** Convert html-to-docx result (Buffer or Blob) to Uint8Array */
+async function toBytes(result: unknown): Promise<Uint8Array> {
+  if (Buffer.isBuffer(result)) {
+    return new Uint8Array(result);
+  }
+  if (result instanceof ArrayBuffer) {
+    return new Uint8Array(result);
+  }
+  if (result instanceof Blob) {
+    const ab = await result.arrayBuffer();
+    return new Uint8Array(ab);
+  }
+  // Fallback: try treating as Buffer-like
+  return new Uint8Array(result as ArrayBuffer);
+}
+
+function docxResponse(bytes: Uint8Array, filename: string) {
+  return new NextResponse(bytes as unknown as BodyInit, {
+    headers: {
+      "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+    },
   });
+}
+
+function getFilename(petitionerName?: string) {
+  return petitionerName
+    ? `Habeas_Corpus_${petitionerName.replace(/\s+/g, "_")}.docx`
+    : "Habeas_Corpus_Petition.docx";
 }
 
 /** POST: convert posted HTML to DOCX (used when user has edited the document) */
@@ -71,32 +118,29 @@ export async function POST(
   }
 
   const { html } = await request.json();
-
-  let buffer: Buffer;
+  const filename = getFilename(caseDoc.petitionerName);
 
   if (html) {
-    const styledHTML = tailwindToInline(html);
-    const fullHTML = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.5;">${styledHTML}</body></html>`;
-    buffer = await HTMLtoDOCX(fullHTML, null, {
-      margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
-      font: "Times New Roman",
-      fontSize: 24,
-    });
-  } else {
-    const doc = generateHabeasDocument(caseDoc.toObject());
-    buffer = await Packer.toBuffer(doc);
+    try {
+      const HTMLtoDOCX = (await import("html-to-docx")).default;
+      const styledHTML = tailwindToInline(html);
+      const fullHTML = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.5;">${styledHTML}</body></html>`;
+      const result = await HTMLtoDOCX(fullHTML, null, {
+        margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
+        font: "Times New Roman",
+        fontSize: 24,
+      });
+      const bytes = await toBytes(result);
+      return docxResponse(bytes, filename);
+    } catch (e) {
+      console.error("html-to-docx failed, falling back to structured generation:", e);
+    }
   }
 
-  const filename = caseDoc.petitionerName
-    ? `Habeas_Corpus_${caseDoc.petitionerName.replace(/\s+/g, "_")}.docx`
-    : "Habeas_Corpus_Petition.docx";
-
-  return new NextResponse(new Uint8Array(buffer), {
-    headers: {
-      "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "Content-Disposition": `attachment; filename="${filename}"`,
-    },
-  });
+  // Fallback: generate from structured case data
+  const doc = generateHabeasDocument(caseDoc.toObject());
+  const buffer = await Packer.toBuffer(doc);
+  return docxResponse(new Uint8Array(buffer), filename);
 }
 
 /** GET: fallback — generate DOCX from structured case data */
@@ -115,15 +159,5 @@ export async function GET(
 
   const doc = generateHabeasDocument(caseDoc.toObject());
   const buffer = await Packer.toBuffer(doc);
-
-  const filename = caseDoc.petitionerName
-    ? `Habeas_Corpus_${caseDoc.petitionerName.replace(/\s+/g, "_")}.docx`
-    : "Habeas_Corpus_Petition.docx";
-
-  return new NextResponse(new Uint8Array(buffer), {
-    headers: {
-      "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "Content-Disposition": `attachment; filename="${filename}"`,
-    },
-  });
+  return docxResponse(new Uint8Array(buffer), getFilename(caseDoc.petitionerName));
 }
