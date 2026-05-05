@@ -38,6 +38,7 @@ interface CaseData {
   serviceDateFieldOffice: string;
   serviceDateDHS: string;
   serviceDateAG: string;
+  documentHTML: string;
 }
 
 function v(val: string | undefined, fallback = "[___]") {
@@ -199,7 +200,12 @@ export default function PreviewPage() {
   async function handleDownload() {
     setDownloading(true);
     try {
-      const res = await fetch(`/api/cases/${id}/docx`);
+      const currentHTML = documentTextRef.current?.innerHTML || "";
+      const res = await fetch(`/api/cases/${id}/docx`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ html: currentHTML }),
+      });
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -222,11 +228,19 @@ export default function PreviewPage() {
     if (!data) return;
     setSaving(true);
     try {
-      await fetch(`/api/cases/${id}`, {
+      const body: Record<string, unknown> = { ...data };
+      if (documentTextRef.current) {
+        body.documentHTML = documentTextRef.current.innerHTML;
+      }
+      const res = await fetch(`/api/cases/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(body),
       });
+      if (res.ok) {
+        const updated = await res.json();
+        setData(updated);
+      }
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2000);
     } finally {
@@ -397,6 +411,17 @@ export default function PreviewPage() {
 
         {/* Document content */}
         <div ref={contentRef} data-print-scroll className="flex-1 overflow-y-auto py-8 px-4">
+          {data.documentHTML ? (
+            <div
+              ref={documentTextRef}
+              contentEditable
+              suppressContentEditableWarning
+              data-print-document
+              className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-16 font-serif text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2"
+              style={{ fontFamily: "'Times New Roman', Times, serif" }}
+              dangerouslySetInnerHTML={{ __html: data.documentHTML }}
+            />
+          ) : (
           <div
             ref={documentTextRef}
             contentEditable
@@ -737,6 +762,7 @@ export default function PreviewPage() {
               </div>
             </div>
           </div>
+          )}
         </div>
 
         {/* AI Review Panel */}

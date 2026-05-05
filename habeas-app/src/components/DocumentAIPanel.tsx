@@ -310,7 +310,7 @@ function FixButton({
       const res = await fetch(`/api/cases/${caseId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [fix.field]: fix.value }),
+        body: JSON.stringify({ [fix.field]: fix.value, documentHTML: "" }),
       });
       if (!res.ok) throw new Error("Update failed");
       setStatus("applied");

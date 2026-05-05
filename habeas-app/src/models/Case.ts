@@ -64,6 +64,9 @@ export interface ICase extends Document {
   wardenServiceFacility: string;
   wardenServiceAddress: string;
 
+  // Edited document HTML (persists manual edits from preview)
+  documentHTML: string;
+
   // Timestamps
   createdAt: Date;
   updatedAt: Date;
@@ -120,6 +123,8 @@ const CaseSchema = new Schema<ICase>(
     wardenServiceTitle: { type: String, default: "" },
     wardenServiceFacility: { type: String, default: "" },
     wardenServiceAddress: { type: String, default: "" },
+
+    documentHTML: { type: String, default: "" },
   },
   { timestamps: true }
 );
