@@ -22,6 +22,8 @@ import {
   TableCell,
   WidthType,
   BorderStyle,
+  TabStopType,
+  TabStopPosition,
 } from "docx";
 
 // ---------- helpers matching generateDocument.ts formatting ----------
@@ -142,6 +144,33 @@ function emptyLine(): Paragraph {
   return new Paragraph({ spacing: { after: 100 }, children: [] });
 }
 
+/** Certificate of service signature block with right-tab date (matches generateDocument.ts) */
+function certSignatureBlock(date: string): Paragraph[] {
+  const rightTab = { type: TabStopType.RIGHT, position: TabStopPosition.MAX };
+  return [
+    new Paragraph({
+      spacing: { after: 60 },
+      tabStops: [rightTab],
+      children: [mkRun("/s/ Manuel Solis"), mkRun("\t"), mkRun(date, { underline: true })],
+    }),
+    new Paragraph({
+      spacing: { after: 60 },
+      tabStops: [rightTab],
+      children: [mkRun("Manuel Solis"), mkRun("\t"), mkRun("Date", { underline: true })],
+    }),
+    new Paragraph({
+      spacing: { after: 300 },
+      children: [mkRun("Attorney for Petitioner")],
+    }),
+  ];
+}
+
+/** Extract date from certificate body text: "On April 30, 2026, Counsel..." → "April 30, 2026" */
+function extractDateFromCertText(text: string): string {
+  const m = text.match(/^On\s+(.+?),\s+Counsel/i);
+  return m ? m[1] : "[___]";
+}
+
 /** Horizontal rule paragraph (border line) matching generateDocument.ts */
 function borderLine(spacing = 0): Paragraph {
   return new Paragraph({
@@ -238,6 +267,10 @@ function parseElement(
     return [sectionTitle(el.text().trim())];
   }
   if (tag === "h3") {
+    // Centered h3 (e.g., CERTIFICATE OF SERVICE) vs. indented subsection
+    if (has(classes, "text-center")) {
+      return [centeredPara([{ text: el.text().trim(), bold: true, italic: false, underline: false }])];
+    }
     return [subSectionTitle(el.text().trim())];
   }
 
@@ -290,6 +323,20 @@ function parseElement(
       centerAlign: ctx.centerAlign || has(classes, "text-center"),
       parentBold: ctx.parentBold || has(classes, "font-bold"),
     };
+
+    // Certificate signature block: <div class="mb-2"> whose first <p> starts with "/s/"
+    if (has(classes, "mb-2")) {
+      const paras = el.children("p");
+      const firstText = paras.first().text().trim();
+      if (firstText.startsWith("/s/")) {
+        // Extract date from the preceding sibling paragraph
+        const prevSibling = el.prev("p");
+        const certDate = prevSibling.length
+          ? extractDateFromCertText(prevSibling.text().trim())
+          : "[___]";
+        return [emptyLine(), ...certSignatureBlock(certDate)];
+      }
+    }
 
     // Check if this div has border classes (caption table wrapper)
     const hasBorderTop = has(classes, "border-t");
