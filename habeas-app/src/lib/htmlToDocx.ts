@@ -1,6 +1,6 @@
 /**
  * Converts edited document HTML (from the contentEditable preview) into a
- * properly formatted DOCX using the `docx` library.  This produces the same
+ * properly formatted DOCX using the `docx` library.  Produces the same
  * quality output as generateHabeasDocument() — proper margins, fonts, headers
  * with page numbers, paragraph spacing, indentation — but reads content from
  * the HTML the user actually edited rather than from structured case fields.
@@ -29,13 +29,14 @@ import {
 const FONT = "Times New Roman";
 const SIZE = 24; // 12pt in half-points
 
-function run(text: string, opts: { bold?: boolean; italic?: boolean; underline?: boolean } = {}): TextRun {
+/** Only pass truthy formatting flags so docx doesn't emit val="false" */
+function mkRun(text: string, opts: { bold?: boolean; italic?: boolean; underline?: boolean } = {}): TextRun {
   return new TextRun({
     text,
     font: FONT,
     size: SIZE,
-    bold: opts.bold,
-    italics: opts.italic,
+    bold: opts.bold || undefined,
+    italics: opts.italic || undefined,
     underline: opts.underline ? { type: UnderlineType.SINGLE } : undefined,
   });
 }
@@ -53,7 +54,7 @@ interface RunDef {
 function extractRuns(
   el: Cheerio<AnyNode>,
   $: CheerioAPI,
-  inherited: { bold: boolean; italic: boolean; underline: boolean } = { bold: false, italic: false, underline: false },
+  inherited: { bold: boolean; italic: boolean; underline: boolean },
 ): RunDef[] {
   const runs: RunDef[] = [];
   el.contents().each((_, node) => {
@@ -75,13 +76,22 @@ function extractRuns(
   return runs;
 }
 
+// ---------- context flowing from parent divs ----------
+
+interface ParseCtx {
+  centerAlign: boolean;
+  parentBold: boolean;
+}
+
+const defaultCtx: ParseCtx = { centerAlign: false, parentBold: false };
+
 // ---------- paragraph builders (same formatting as generateDocument.ts) ----------
 
 function centeredPara(runs: RunDef[]): Paragraph {
   return new Paragraph({
     alignment: AlignmentType.CENTER,
     spacing: { after: 120 },
-    children: runs.map((r) => run(r.text, r)),
+    children: runs.map((r) => mkRun(r.text, r)),
   });
 }
 
@@ -89,15 +99,7 @@ function sectionTitle(text: string): Paragraph {
   return new Paragraph({
     alignment: AlignmentType.CENTER,
     spacing: { before: 400, after: 200 },
-    children: [
-      new TextRun({
-        text,
-        bold: true,
-        underline: { type: UnderlineType.SINGLE },
-        font: FONT,
-        size: SIZE,
-      }),
-    ],
+    children: [mkRun(text, { bold: true, underline: true })],
   });
 }
 
@@ -106,7 +108,7 @@ function subSectionTitle(text: string): Paragraph {
     alignment: AlignmentType.LEFT,
     spacing: { before: 300, after: 200 },
     indent: { firstLine: 720 },
-    children: [run(text, { bold: true })],
+    children: [mkRun(text, { bold: true })],
   });
 }
 
@@ -115,7 +117,7 @@ function bodyPara(runs: RunDef[], justify: boolean): Paragraph {
     alignment: justify ? AlignmentType.JUSTIFIED : AlignmentType.LEFT,
     spacing: { after: 200, line: 360 },
     indent: { firstLine: 720 },
-    children: runs.map((r) => run(r.text, r)),
+    children: runs.map((r) => mkRun(r.text, r)),
   });
 }
 
@@ -124,7 +126,7 @@ function subItemPara(runs: RunDef[]): Paragraph {
     alignment: AlignmentType.JUSTIFIED,
     spacing: { after: 120, line: 360 },
     indent: { left: 1440, hanging: 360 },
-    children: runs.map((r) => run(r.text, r)),
+    children: runs.map((r) => mkRun(r.text, r)),
   });
 }
 
@@ -132,12 +134,23 @@ function signaturePara(runs: RunDef[], spacing = 60): Paragraph {
   return new Paragraph({
     spacing: { after: spacing },
     indent: { left: 5760 },
-    children: runs.map((r) => run(r.text, r)),
+    children: runs.map((r) => mkRun(r.text, r)),
   });
 }
 
 function emptyLine(): Paragraph {
   return new Paragraph({ spacing: { after: 100 }, children: [] });
+}
+
+/** Horizontal rule paragraph (border line) matching generateDocument.ts */
+function borderLine(spacing = 0): Paragraph {
+  return new Paragraph({
+    spacing: { after: spacing },
+    border: {
+      bottom: { style: BorderStyle.SINGLE, size: 6, space: 1, color: "000000" },
+    },
+    children: [],
+  });
 }
 
 // ---------- table helpers (caption) ----------
@@ -154,7 +167,7 @@ function captionRow(leftText: string, rightText: string): TableRow {
         children: [
           new Paragraph({
             spacing: { after: 0, line: 240 },
-            children: leftText ? [run(leftText)] : [],
+            children: leftText ? [mkRun(leftText)] : [],
           }),
         ],
       }),
@@ -164,7 +177,7 @@ function captionRow(leftText: string, rightText: string): TableRow {
         children: [
           new Paragraph({
             spacing: { after: 0, line: 240 },
-            children: [run("\u00A7")],
+            children: [mkRun("\u00A7")],
           }),
         ],
       }),
@@ -174,7 +187,7 @@ function captionRow(leftText: string, rightText: string): TableRow {
         children: [
           new Paragraph({
             spacing: { after: 0, line: 240 },
-            children: rightText ? [run(rightText, { bold: true })] : [],
+            children: rightText ? [mkRun(rightText, { bold: true })] : [],
           }),
         ],
       }),
@@ -198,19 +211,27 @@ function parseTable(tableEl: Cheerio<AnyNode>, $: CheerioAPI): Table {
   });
 }
 
-// ---------- main element parser ----------
+// ---------- class helpers ----------
 
-function hasClass(el: Cheerio<AnyNode>, cls: string): boolean {
-  return (el.attr("class") || "").split(/\s+/).includes(cls);
+function cls(el: Cheerio<AnyNode>): string[] {
+  return (el.attr("class") || "").split(/\s+/).filter(Boolean);
 }
+
+function has(classes: string[], name: string): boolean {
+  return classes.includes(name);
+}
+
+// ---------- main element parser ----------
 
 function parseElement(
   node: AnyNode,
   $: CheerioAPI,
+  ctx: ParseCtx,
 ): (Paragraph | Table)[] {
   if (node.type !== "tag") return [];
   const el = $(node);
   const tag = (node as DomElement).name?.toLowerCase();
+  const classes = cls(el);
 
   // Section headers
   if (tag === "h2") {
@@ -222,32 +243,38 @@ function parseElement(
 
   // Paragraphs
   if (tag === "p") {
-    const runs = extractRuns(el, $);
+    // Determine inherited bold: from parent div context OR from own font-bold class
+    const isBold = ctx.parentBold || has(classes, "font-bold");
+    const inherited = { bold: isBold, italic: has(classes, "italic"), underline: false };
+    const runs = extractRuns(el, $, inherited);
     if (!runs.length || runs.every((r) => !r.text.trim())) return [];
 
+    // Determine alignment: own class > parent context
+    const isCenter = has(classes, "text-center") || ctx.centerAlign;
+    const isJustify = has(classes, "text-justify");
+
     // Signature-block paragraphs (far right indent)
-    if (hasClass(el, "ml-64")) {
+    if (has(classes, "ml-64")) {
       return [signaturePara(runs)];
     }
     // Sub-items (a., b., c.)
-    if (hasClass(el, "ml-12")) {
+    if (has(classes, "ml-12")) {
       return [subItemPara(runs)];
     }
     // Centered paragraphs
-    if (hasClass(el, "text-center")) {
+    if (isCenter) {
       return [centeredPara(runs)];
     }
     // Body paragraphs with indent
-    if (hasClass(el, "indent-8")) {
-      return [bodyPara(runs, hasClass(el, "text-justify"))];
+    if (has(classes, "indent-8")) {
+      return [bodyPara(runs, isJustify)];
     }
     // Default paragraph
-    const justify = hasClass(el, "text-justify");
     return [
       new Paragraph({
-        alignment: justify ? AlignmentType.JUSTIFIED : AlignmentType.LEFT,
+        alignment: isJustify ? AlignmentType.JUSTIFIED : AlignmentType.LEFT,
         spacing: { after: 120 },
-        children: runs.map((r) => run(r.text, r)),
+        children: runs.map((r) => mkRun(r.text, r)),
       }),
     ];
   }
@@ -257,12 +284,25 @@ function parseElement(
     return [parseTable(el, $)];
   }
 
-  // Container divs — recurse
+  // Container divs — recurse, propagating context from classes
   if (tag === "div") {
+    const childCtx: ParseCtx = {
+      centerAlign: ctx.centerAlign || has(classes, "text-center"),
+      parentBold: ctx.parentBold || has(classes, "font-bold"),
+    };
+
+    // Check if this div has border classes (caption table wrapper)
+    const hasBorderTop = has(classes, "border-t");
+    const hasBorderBottom = has(classes, "border-b");
+
     const results: (Paragraph | Table)[] = [];
+    if (hasBorderTop) results.push(borderLine(0));
+
     el.children().each((_, child) => {
-      results.push(...parseElement(child, $));
+      results.push(...parseElement(child, $, childCtx));
     });
+
+    if (hasBorderBottom) results.push(borderLine(200));
     return results;
   }
 
@@ -281,10 +321,9 @@ export function generateFromHTML(html: string): Document {
   $("body")
     .children()
     .each((_, node) => {
-      children.push(...parseElement(node, $));
+      children.push(...parseElement(node, $, defaultCtx));
     });
 
-  // Add a trailing empty line if content was found
   if (children.length) children.push(emptyLine());
 
   return new Document({
