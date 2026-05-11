@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import DocumentAIPanel from "@/components/DocumentAIPanel";
+import { getEroFieldOfficeAddress } from "@/lib/eroFieldOffices";
 
 interface CaseData {
   _id: string;
@@ -18,6 +19,7 @@ interface CaseData {
   detentionDate: string;
   apprehensionCircumstance: string;
   facilityName: string;
+  facilityAddress: string;
   wardenName: string;
   wardenTitle: string;
   fieldOfficeDirector: string;
@@ -724,7 +726,7 @@ export default function PreviewPage() {
             <div id="service" className="mt-12 border-t pt-8">
               <h3 className="text-center font-bold mb-4">CERTIFICATE OF SERVICE</h3>
               <p className="text-justify indent-8 mb-6">
-                On {formatDate(data.serviceDateWarden || data.serviceDateFieldOffice)}, Counsel for Plaintiff served a copy of the attached Petition via USPS Mail, in compliance with Rule 4 of Federal Rules of Civil Procedure, upon the Respondent, {v(data.wardenName, "RANDY TATE").toUpperCase()}, in {v(data.wardenTitle, "his")} Official Capacity as Warden of the {v(data.facilityName, "Montgomery Processing Center")}, at the Immigration and Customs Enforcement (&ldquo;ICE&rdquo;) {v(data.facilityName, "Montgomery Processing Center")}.
+                On {formatDate(data.serviceDateWarden || data.serviceDateFieldOffice)}, Counsel for Plaintiff served a copy of the attached Petition via USPS Mail, in compliance with Rule 4 of Federal Rules of Civil Procedure, upon the Respondent, {v(data.wardenName, "RANDY TATE").toUpperCase()}, in {v(data.wardenTitle, "his")} Official Capacity as Warden of the {v(data.facilityName, "Montgomery Processing Center")}, at the Immigration and Customs Enforcement (&ldquo;ICE&rdquo;) {v(data.facilityName, "Montgomery Processing Center")}, located at {v(data.facilityAddress, "[ADDRESS]")}.
               </p>
               <div className="mb-2">
                 <p>/s/ Manuel Solis</p>
@@ -734,7 +736,7 @@ export default function PreviewPage() {
 
               <h3 className="text-center font-bold mb-4 mt-8">CERTIFICATE OF SERVICE</h3>
               <p className="text-justify indent-8 mb-6">
-                On {formatDate(data.serviceDateFieldOffice)}, Counsel for Plaintiff served a copy of the attached Petition via USPS Mail, in compliance with Rule 4 of Federal Rules of Civil Procedure, upon the Respondent, {v(data.fieldOfficeDirector, "Bret Bradford")}, in his Official Capacity as Field Office Director, of ICE Enforcement and Removal Operations {v(data.eroFieldOffice, "Houston Field Office")}, at the Office of the Field Office Director, Enforcement and Removal Operations, {v(data.eroFieldOffice, "Houston Field Office")}.
+                On {formatDate(data.serviceDateFieldOffice)}, Counsel for Plaintiff served a copy of the attached Petition via USPS Mail, in compliance with Rule 4 of Federal Rules of Civil Procedure, upon the Respondent, {v(data.fieldOfficeDirector, "Bret Bradford")}, in his Official Capacity as Field Office Director, of ICE Enforcement and Removal Operations {v(data.eroFieldOffice, "Houston Field Office")}, at the Office of the Field Office Director, Enforcement and Removal Operations, {v(data.eroFieldOffice, "Houston Field Office")}, {getEroFieldOfficeAddress(data.eroFieldOffice) || "126 Northpoint Drive, Houston, Texas 77060"}.
               </p>
               <div className="mb-2">
                 <p>/s/ Manuel Solis</p>
