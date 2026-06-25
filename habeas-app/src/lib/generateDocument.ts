@@ -8,7 +8,6 @@ import {
   TabStopPosition,
   TabStopType,
   Header,
-  Footer,
   PageNumber,
   NumberFormat,
   UnderlineType,
@@ -1077,16 +1076,6 @@ export function generateOklahomaDocument(data: CaseData): Document {
               new Paragraph({
                 alignment: AlignmentType.CENTER,
                 children: [new TextRun({ children: [PageNumber.CURRENT], font: "Times New Roman", size: CURRENT_SIZE - 4 })],
-              }),
-            ],
-          }),
-        },
-        footers: {
-          default: new Footer({
-            children: [
-              new Paragraph({
-                alignment: AlignmentType.CENTER,
-                children: [new TextRun({ children: ["-- ", PageNumber.CURRENT, " of ", PageNumber.TOTAL_PAGES, " --"], font: "Times New Roman", size: CURRENT_SIZE - 4 })],
               }),
             ],
           }),

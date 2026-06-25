@@ -15,7 +15,6 @@ import {
   TextRun,
   AlignmentType,
   Header,
-  Footer,
   PageNumber,
   NumberFormat,
   UnderlineType,
@@ -456,26 +455,6 @@ export function generateFromHTML(html: string, template?: string | null): Docume
             ],
           }),
         },
-        ...(IS_OKLAHOMA
-          ? {
-              footers: {
-                default: new Footer({
-                  children: [
-                    new Paragraph({
-                      alignment: AlignmentType.CENTER,
-                      children: [
-                        new TextRun({
-                          children: ["-- ", PageNumber.CURRENT, " of ", PageNumber.TOTAL_PAGES, " --"],
-                          font: FONT,
-                          size: CURRENT_SIZE - 4,
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-              },
-            }
-          : {}),
         children,
       },
     ],

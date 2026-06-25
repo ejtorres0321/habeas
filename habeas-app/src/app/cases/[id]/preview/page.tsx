@@ -301,7 +301,17 @@ export default function PreviewPage() {
       {/* Print styles */}
       <style>{`
         @media print {
-          @page { size: letter; margin: 1in; }
+          @page {
+            size: letter;
+            margin: 1in;
+            @top-center {
+              content: counter(page);
+              font-family: 'Times New Roman', Times, serif;
+              font-size: ${tpl.fontSizeCSS};
+            }
+          }
+          /* The on-screen page-number hint would duplicate the @page counter */
+          .preview-page-number { display: none !important; }
           html, body {
             background: white !important;
             height: auto !important;
