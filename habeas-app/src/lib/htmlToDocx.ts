@@ -8,12 +8,14 @@
 
 import { load, type CheerioAPI, type Cheerio } from "cheerio";
 import type { Element as DomElement, Text as DomText, AnyNode } from "domhandler";
+import { getTemplateConfig } from "./templateConfig";
 import {
   Document,
   Paragraph,
   TextRun,
   AlignmentType,
   Header,
+  Footer,
   PageNumber,
   NumberFormat,
   UnderlineType,
@@ -29,14 +31,15 @@ import {
 // ---------- helpers matching generateDocument.ts formatting ----------
 
 const FONT = "Times New Roman";
-const SIZE = 24; // 12pt in half-points
+let CURRENT_SIZE = 24;
+let IS_OKLAHOMA = false;
 
 /** Only pass truthy formatting flags so docx doesn't emit val="false" */
 function mkRun(text: string, opts: { bold?: boolean; italic?: boolean; underline?: boolean } = {}): TextRun {
   return new TextRun({
     text,
     font: FONT,
-    size: SIZE,
+    size: CURRENT_SIZE,
     bold: opts.bold || undefined,
     italics: opts.italic || undefined,
     underline: opts.underline ? { type: UnderlineType.SINGLE } : undefined,
@@ -87,13 +90,17 @@ interface ParseCtx {
 
 const defaultCtx: ParseCtx = { centerAlign: false, parentBold: false };
 
+function runFromDef(r: RunDef): TextRun {
+  return mkRun(r.text, { bold: r.bold, italic: r.italic, underline: r.underline });
+}
+
 // ---------- paragraph builders (same formatting as generateDocument.ts) ----------
 
 function centeredPara(runs: RunDef[]): Paragraph {
   return new Paragraph({
     alignment: AlignmentType.CENTER,
     spacing: { after: 120 },
-    children: runs.map((r) => mkRun(r.text, r)),
+    children: runs.map(runFromDef),
   });
 }
 
@@ -119,7 +126,7 @@ function bodyPara(runs: RunDef[], justify: boolean): Paragraph {
     alignment: justify ? AlignmentType.JUSTIFIED : AlignmentType.LEFT,
     spacing: { after: 200, line: 360 },
     indent: { firstLine: 720 },
-    children: runs.map((r) => mkRun(r.text, r)),
+    children: runs.map(runFromDef),
   });
 }
 
@@ -128,7 +135,7 @@ function subItemPara(runs: RunDef[]): Paragraph {
     alignment: AlignmentType.JUSTIFIED,
     spacing: { after: 120, line: 360 },
     indent: { left: 1440, hanging: 360 },
-    children: runs.map((r) => mkRun(r.text, r)),
+    children: runs.map(runFromDef),
   });
 }
 
@@ -136,7 +143,7 @@ function signaturePara(runs: RunDef[], spacing = 60): Paragraph {
   return new Paragraph({
     spacing: { after: spacing },
     indent: { left: 5760 },
-    children: runs.map((r) => mkRun(r.text, r)),
+    children: runs.map(runFromDef),
   });
 }
 
@@ -165,6 +172,28 @@ function certSignatureBlock(date: string): Paragraph[] {
   ];
 }
 
+/** Oklahoma certificate signature block: right-tab date + local counsel (matches generateDocument.ts) */
+function okCertSignatureBlock(date: string): Paragraph[] {
+  const lc = getTemplateConfig("oklahoma").localCounsel!;
+  const rightTab = { type: TabStopType.RIGHT, position: TabStopPosition.MAX };
+  return [
+    new Paragraph({
+      spacing: { after: 60 },
+      tabStops: [rightTab],
+      children: [mkRun("/s/ Manuel Solis"), mkRun("\t"), mkRun(date, { underline: true })],
+    }),
+    new Paragraph({
+      spacing: { after: 60 },
+      tabStops: [rightTab],
+      children: [mkRun("Manuel Solis"), mkRun("\t"), mkRun("Date", { underline: true })],
+    }),
+    new Paragraph({ spacing: { after: 120 }, children: [mkRun("Attorney for Petitioner")] }),
+    new Paragraph({ spacing: { after: 60 }, children: [mkRun(`/s/ ${lc.name}`, { italic: true })] }),
+    new Paragraph({ spacing: { after: 60 }, children: [mkRun(lc.name)] }),
+    new Paragraph({ spacing: { after: 300 }, children: [mkRun("Local Counsel")] }),
+  ];
+}
+
 /** Extract date from certificate body text: "On April 30, 2026, Counsel..." → "April 30, 2026" */
 function extractDateFromCertText(text: string): string {
   const m = text.match(/^On\s+(.+?),\s+Counsel/i);
@@ -187,7 +216,7 @@ function borderLine(spacing = 0): Paragraph {
 const noBorder = { style: BorderStyle.NONE, size: 0, space: 0, color: "FFFFFF" };
 const noBorders = { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder };
 
-function captionRow(leftText: string, rightText: string): TableRow {
+function captionRow(leftText: string, rightText: string, indentLeft = 0): TableRow {
   return new TableRow({
     children: [
       new TableCell({
@@ -196,6 +225,7 @@ function captionRow(leftText: string, rightText: string): TableRow {
         children: [
           new Paragraph({
             spacing: { after: 0, line: 240 },
+            indent: indentLeft ? { left: indentLeft } : undefined,
             children: leftText ? [mkRun(leftText)] : [],
           }),
         ],
@@ -230,7 +260,9 @@ function parseTable(tableEl: Cheerio<AnyNode>, $: CheerioAPI): Table {
     const cells = $(tr).find("td");
     const left = cells.eq(0).text().trim();
     const right = cells.eq(2).text().trim();
-    rows.push(captionRow(left, right));
+    const leftClass = cells.eq(0).attr("class") || "";
+    const indentLeft = leftClass.includes("caption-indent") ? 288 : 0;
+    rows.push(captionRow(left, right, indentLeft));
   });
   if (!rows.length) rows.push(captionRow("", ""));
   return new Table({
@@ -307,7 +339,7 @@ function parseElement(
       new Paragraph({
         alignment: isJustify ? AlignmentType.JUSTIFIED : AlignmentType.LEFT,
         spacing: { after: 120 },
-        children: runs.map((r) => mkRun(r.text, r)),
+        children: runs.map(runFromDef),
       }),
     ];
   }
@@ -334,7 +366,10 @@ function parseElement(
         const certDate = prevSibling.length
           ? extractDateFromCertText(prevSibling.text().trim())
           : "[___]";
-        return [emptyLine(), ...certSignatureBlock(certDate)];
+        return [
+          emptyLine(),
+          ...(IS_OKLAHOMA ? okCertSignatureBlock(certDate) : certSignatureBlock(certDate)),
+        ];
       }
     }
 
@@ -358,7 +393,10 @@ function parseElement(
 
 // ---------- public API ----------
 
-export function generateFromHTML(html: string): Document {
+export function generateFromHTML(html: string, template?: string | null): Document {
+  const tplConfig = getTemplateConfig(template);
+  CURRENT_SIZE = tplConfig.fontSizeHalfPoints;
+  IS_OKLAHOMA = tplConfig.id === "oklahoma";
   const $ = load(html);
 
   const children: (Paragraph | Table)[] = [];
@@ -391,13 +429,33 @@ export function generateFromHTML(html: string): Document {
                   new TextRun({
                     children: [PageNumber.CURRENT],
                     font: FONT,
-                    size: 20,
+                    size: CURRENT_SIZE - 4,
                   }),
                 ],
               }),
             ],
           }),
         },
+        ...(IS_OKLAHOMA
+          ? {
+              footers: {
+                default: new Footer({
+                  children: [
+                    new Paragraph({
+                      alignment: AlignmentType.CENTER,
+                      children: [
+                        new TextRun({
+                          children: ["-- ", PageNumber.CURRENT, " of ", PageNumber.TOTAL_PAGES, " --"],
+                          font: FONT,
+                          size: CURRENT_SIZE - 4,
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              },
+            }
+          : {}),
         children,
       },
     ],

@@ -1,8 +1,10 @@
 import { eroFieldOffices } from "./eroFieldOffices";
+import { templateOptions } from "./templateConfig";
 
 export interface CaseFormData {
   civilNo: string;
   status: "draft" | "filed" | "resolved";
+  template: "texas" | "oklahoma";
   petitionerName: string;
   petitionerAge: string;
   petitionerAddress: string;
@@ -21,6 +23,7 @@ export interface CaseFormData {
   immigrationCourtLocation: string;
   nextHearingDate: string;
   reliefType: string;
+  removalOrderDate: string;
   familyDetails: string;
   spouseInfo: string;
   childrenInfo: string;
@@ -42,6 +45,7 @@ export interface CaseFormData {
 export const defaultCaseData: CaseFormData = {
   civilNo: "",
   status: "draft",
+  template: "texas",
   petitionerName: "",
   petitionerAge: "",
   petitionerAddress: "",
@@ -60,6 +64,7 @@ export const defaultCaseData: CaseFormData = {
   immigrationCourtLocation: "",
   nextHearingDate: "",
   reliefType: "",
+  removalOrderDate: "",
   familyDetails: "",
   spouseInfo: "",
   childrenInfo: "",
@@ -92,6 +97,12 @@ export const formSections: { title: string; fields: FieldConfig[] }[] = [
   {
     title: "Case Information",
     fields: [
+      {
+        key: "template",
+        label: "Document Template",
+        type: "select",
+        options: templateOptions.map((t) => t.value),
+      },
       { key: "civilNo", label: "Civil No.", type: "text", placeholder: "e.g., 4:26-cv-00000" },
       {
         key: "status",
@@ -153,6 +164,12 @@ export const formSections: { title: string; fields: FieldConfig[] }[] = [
         label: "Type of Relief Sought",
         type: "select",
         options: ["asylum", "cancellation of removal under 8 U.S.C. \u00A71229b(b)", "both"],
+      },
+      {
+        key: "removalOrderDate",
+        label: "Removal Order Date (Oklahoma — IJ order, BIA appeal pending)",
+        type: "date",
+        visibleWhen: { field: "template", value: "oklahoma" },
       },
     ],
   },
