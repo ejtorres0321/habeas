@@ -156,6 +156,26 @@ export default function CaseForm({ initialData, caseId }: CaseFormProps) {
           </div>
         )}
 
+        <div className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-sm border border-blue-200 p-6">
+          <label className="block text-sm font-semibold text-blue-900 mb-1.5">
+            Document Template
+          </label>
+          <p className="text-xs text-blue-700/80 mb-3">
+            Choose the jurisdiction template used to generate this petition.
+          </p>
+          <select
+            value={formData.template}
+            onChange={(e) => handleChange("template", e.target.value)}
+            className="w-full md:w-1/2 px-3 py-2 border border-blue-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+          >
+            {templateOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {formSections.map((section) => (
           <div key={section.title} className="mb-8 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">

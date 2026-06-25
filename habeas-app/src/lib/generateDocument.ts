@@ -18,6 +18,7 @@ import {
   TableCell,
   WidthType,
   VerticalAlign,
+  ExternalHyperlink,
 } from "docx";
 
 interface CaseData {
@@ -87,6 +88,10 @@ function italic(text: string): TextRun {
 
 function underline(text: string): TextRun {
   return new TextRun({ text, underline: { type: UnderlineType.SINGLE }, font: "Times New Roman", size: CURRENT_SIZE });
+}
+
+function italicUnderline(text: string): TextRun {
+  return new TextRun({ text, italics: true, underline: { type: UnderlineType.SINGLE }, font: "Times New Roman", size: CURRENT_SIZE });
 }
 
 function centered(...runs: TextRun[]): Paragraph {
@@ -711,27 +716,41 @@ function leftPara(...runs: TextRun[]): Paragraph {
   return new Paragraph({ spacing: { after: 60 }, children: runs });
 }
 
+function emailLinkPara(email: string): Paragraph {
+  return new Paragraph({
+    spacing: { after: 60 },
+    children: [
+      new ExternalHyperlink({
+        link: `mailto:${email}`,
+        children: [
+          new TextRun({ text: email, font: "Times New Roman", size: CURRENT_SIZE, color: "0563C1", underline: { type: UnderlineType.SINGLE } }),
+        ],
+      }),
+    ],
+  });
+}
+
 function okSignatureBlock(): Paragraph[] {
   const lc = templates.oklahoma.localCounsel!;
   return [
     leftPara(normal("Respectfully submitted,")),
     emptyLine(),
-    leftPara(italic("/s/ Manuel E. Solis")),
+    leftPara(italicUnderline("/s/ Manuel E. Solis")),
     leftPara(bold("Manuel E. Solis")),
     leftPara(normal("Attorney for Petitioner")),
     leftPara(normal("State Bar No. 18826790")),
     leftPara(normal("P.O. Box 230593")),
     leftPara(normal("Houston TX 77223")),
     leftPara(normal("Houston Office: 713-481-1030")),
-    leftPara(normal("casestatus@manuelsolis.com")),
+    emailLinkPara("casestatus@manuelsolis.com"),
     emptyLine(),
-    leftPara(italic(`/s/ ${lc.name}`)),
+    leftPara(italicUnderline(`/s/ ${lc.name}`)),
     leftPara(bold(`${lc.name}, ${lc.bar}`)),
     leftPara(normal(lc.firm)),
     ...lc.addressLines.map((l) => leftPara(normal(l))),
     leftPara(normal(lc.phone)),
-    leftPara(normal(lc.email)),
-    leftPara(normal("Local Counsel")),
+    emailLinkPara(lc.email),
+    leftPara(italic("Local Counsel")),
   ];
 }
 
@@ -742,7 +761,7 @@ function okCertSignatureBlock(date: string): Paragraph[] {
     new Paragraph({
       spacing: { after: 60 },
       tabStops: [rightTab],
-      children: [normal("/s/ Manuel Solis"), normal("\t"), underline(date)],
+      children: [italicUnderline("/s/ Manuel Solis"), normal("\t"), underline(date)],
     }),
     new Paragraph({
       spacing: { after: 60 },
@@ -751,7 +770,7 @@ function okCertSignatureBlock(date: string): Paragraph[] {
     }),
     leftPara(normal("Attorney for Petitioner")),
     emptyLine(),
-    leftPara(italic(`/s/ ${lc.name}`)),
+    leftPara(italicUnderline(`/s/ ${lc.name}`)),
     leftPara(normal(lc.name)),
     leftPara(normal("Local Counsel")),
     emptyLine(),
@@ -789,6 +808,23 @@ function detentionDuration(detentionDate?: string, monthsFallback?: string): str
   return m ? `${m} months` : "[___]";
 }
 
+/** Split caption text into fixed-width lines so each visual line gets its own § (no gaps). */
+function wrapCaptionText(text: string, maxLen = 36): string[] {
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let cur = "";
+  for (const w of words) {
+    if (cur && (cur + " " + w).length > maxLen) {
+      lines.push(cur);
+      cur = w;
+    } else {
+      cur = cur ? cur + " " + w : w;
+    }
+  }
+  if (cur) lines.push(cur);
+  return lines.length ? lines : [""];
+}
+
 export function generateOklahomaDocument(data: CaseData): Document {
   const d = data;
   const tpl = templates.oklahoma;
@@ -823,27 +859,23 @@ export function generateOklahomaDocument(data: CaseData): Document {
       width: { size: 100, type: WidthType.PERCENTAGE },
       borders: noBorders,
       rows: [
-        captionRow([normal(`${v(d.petitionerName).toUpperCase()},`)], []),
+        ...wrapCaptionText(`${v(d.petitionerName).toUpperCase()},`).map((l, i) => captionRow([normal(l)], [], i === 0 ? 0 : 288)),
         captionRow([], []),
-        captionRow([italic("     Petitioner")], []),
+        captionRow([normal("Petitioner")], []),
         captionRow([], []),
         captionRow([], [bold("PETITION FOR")]),
         captionRow([normal("v.")], [bold("WRIT OF HABEAS CORPUS")]),
-        captionRow([], [bold("PURSUANT TO 28 U.S.C \u00A72241")]),
-        captionRow([normal(`1. ${warden.toUpperCase()}, in the official capacity`)], []),
-        captionRow([normal(`as Warden of the ${facility};`)], [], 288),
+        captionRow([], [bold("PURSUANT TO 28 U.S.C")]),
+        captionRow([], [bold("\u00A72241")]),
+        ...wrapCaptionText(`1. ${warden.toUpperCase()}, in the official capacity as Warden of the ${facility};`).map((l, i) => captionRow([normal(l)], [], i === 0 ? 0 : 288)),
         captionRow([], []),
-        captionRow([normal(`2. ${fod.toUpperCase()}, in his official capacity as`)], []),
-        captionRow([normal("Field Office Director of ICE Enforcement and")], [], 288),
-        captionRow([normal(`Removal Operations ${ero};`)], [], 288),
+        ...wrapCaptionText(`2. ${fod.toUpperCase()}, in his official capacity as Field Office Director of ICE Enforcement and Removal Operations ${ero};`).map((l, i) => captionRow([normal(l)], [], i === 0 ? 0 : 288)),
         captionRow([], []),
-        captionRow([normal("3. MARKWAYNE MULLIN, in his official capacity")], []),
-        captionRow([normal("as Secretary of the Department of Homeland Security;")], [], 288),
+        ...wrapCaptionText("3. MARKWAYNE MULLIN, in his official capacity as Secretary of the Department of Homeland Security;").map((l, i) => captionRow([normal(l)], [], i === 0 ? 0 : 288)),
         captionRow([], []),
-        captionRow([normal("4. TODD BLANCHE, in his official capacity as")], []),
-        captionRow([normal("Acting Attorney General of the United States,")], [], 288),
+        ...wrapCaptionText("4. TODD BLANCHE, in his official capacity as Acting Attorney General of the United States,").map((l, i) => captionRow([normal(l)], [], i === 0 ? 0 : 288)),
         captionRow([], []),
-        captionRow([italic("     Respondents.")], []),
+        captionRow([normal("Respondents.")], []),
       ],
     }),
 
@@ -853,7 +885,8 @@ export function generateOklahomaDocument(data: CaseData): Document {
       children: [],
     }),
 
-    centered(bold("PETITION FOR WRIT OF HABEAS CORPUS PURSUANT TO 28 U.S.C. \u00A72241")),
+    centered(bold("PETITION FOR WRIT OF HABEAS CORPUS PURSUANT TO 28 U.S.C.")),
+    centered(bold("\u00A72241")),
     centered(bold("AND COMPLAINT FOR DECLARATORY AND INJUNCTIVE RELIEF")),
     emptyLine(),
 
@@ -1000,7 +1033,7 @@ export function generateOklahomaDocument(data: CaseData): Document {
 
     // VI. VERIFICATION
     sectionTitle("VI. VERIFICATION"),
-    justified(normal("I declare under penalty of perjury that the foregoing is true and correct.")),
+    centered(normal("I declare under penalty of perjury that the foregoing is true and correct.")),
     emptyLine(),
     ...okSignatureBlock(),
 
@@ -1033,6 +1066,7 @@ export function generateOklahomaDocument(data: CaseData): Document {
       {
         properties: {
           page: {
+            size: { width: 12240, height: 15840 },
             margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
             pageNumbers: { start: 1, formatType: NumberFormat.DECIMAL },
           },

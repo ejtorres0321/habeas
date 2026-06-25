@@ -26,6 +26,7 @@ import {
   BorderStyle,
   TabStopType,
   TabStopPosition,
+  ExternalHyperlink,
 } from "docx";
 
 // ---------- helpers matching generateDocument.ts formatting ----------
@@ -53,6 +54,7 @@ interface RunDef {
   bold: boolean;
   italic: boolean;
   underline: boolean;
+  link?: string;
 }
 
 /** Recursively extract text runs with formatting from an element's children */
@@ -71,10 +73,14 @@ function extractRuns(
     } else if (node.type === "tag") {
       const tag = (node as DomElement).name?.toLowerCase();
       const child = $(node);
-      const next = { ...inherited };
+      const next: { bold: boolean; italic: boolean; underline: boolean; link?: string } = { ...inherited };
       if (tag === "strong" || tag === "b") next.bold = true;
       if (tag === "em" || tag === "i") next.italic = true;
       if (tag === "u") next.underline = true;
+      if (tag === "a") {
+        next.link = child.attr("href") || undefined;
+        next.underline = true;
+      }
       runs.push(...extractRuns(child, $, next));
     }
   });
@@ -92,6 +98,16 @@ const defaultCtx: ParseCtx = { centerAlign: false, parentBold: false };
 
 function runFromDef(r: RunDef): TextRun {
   return mkRun(r.text, { bold: r.bold, italic: r.italic, underline: r.underline });
+}
+
+function runChild(r: RunDef): TextRun | ExternalHyperlink {
+  if (r.link) {
+    return new ExternalHyperlink({
+      link: r.link,
+      children: [new TextRun({ text: r.text, font: FONT, size: CURRENT_SIZE, color: "0563C1", underline: { type: UnderlineType.SINGLE } })],
+    });
+  }
+  return runFromDef(r);
 }
 
 // ---------- paragraph builders (same formatting as generateDocument.ts) ----------
@@ -180,7 +196,7 @@ function okCertSignatureBlock(date: string): Paragraph[] {
     new Paragraph({
       spacing: { after: 60 },
       tabStops: [rightTab],
-      children: [mkRun("/s/ Manuel Solis"), mkRun("\t"), mkRun(date, { underline: true })],
+      children: [mkRun("/s/ Manuel Solis", { italic: true, underline: true }), mkRun("\t"), mkRun(date, { underline: true })],
     }),
     new Paragraph({
       spacing: { after: 60 },
@@ -188,7 +204,7 @@ function okCertSignatureBlock(date: string): Paragraph[] {
       children: [mkRun("Manuel Solis"), mkRun("\t"), mkRun("Date", { underline: true })],
     }),
     new Paragraph({ spacing: { after: 120 }, children: [mkRun("Attorney for Petitioner")] }),
-    new Paragraph({ spacing: { after: 60 }, children: [mkRun(`/s/ ${lc.name}`, { italic: true })] }),
+    new Paragraph({ spacing: { after: 60 }, children: [mkRun(`/s/ ${lc.name}`, { italic: true, underline: true })] }),
     new Paragraph({ spacing: { after: 60 }, children: [mkRun(lc.name)] }),
     new Paragraph({ spacing: { after: 300 }, children: [mkRun("Local Counsel")] }),
   ];
@@ -294,6 +310,9 @@ function parseElement(
   const tag = (node as DomElement).name?.toLowerCase();
   const classes = cls(el);
 
+  // Preview-only elements (e.g. page-number hint) — DOCX renders these via header/footer
+  if (has(classes, "preview-page-number")) return [];
+
   // Section headers
   if (tag === "h2") {
     return [sectionTitle(el.text().trim())];
@@ -310,7 +329,7 @@ function parseElement(
   if (tag === "p") {
     // Determine inherited bold: from parent div context OR from own font-bold class
     const isBold = ctx.parentBold || has(classes, "font-bold");
-    const inherited = { bold: isBold, italic: has(classes, "italic"), underline: false };
+    const inherited = { bold: isBold, italic: has(classes, "italic"), underline: has(classes, "underline") };
     const runs = extractRuns(el, $, inherited);
     if (!runs.length || runs.every((r) => !r.text.trim())) return [];
 
@@ -339,7 +358,7 @@ function parseElement(
       new Paragraph({
         alignment: isJustify ? AlignmentType.JUSTIFIED : AlignmentType.LEFT,
         spacing: { after: 120 },
-        children: runs.map(runFromDef),
+        children: runs.map(runChild),
       }),
     ];
   }
@@ -416,6 +435,7 @@ export function generateFromHTML(html: string, template?: string | null): Docume
       {
         properties: {
           page: {
+            ...(IS_OKLAHOMA ? { size: { width: 12240, height: 15840 } } : {}),
             margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
             pageNumbers: { start: 1, formatType: NumberFormat.DECIMAL },
           },

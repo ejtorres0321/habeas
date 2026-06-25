@@ -1,5 +1,4 @@
 import { eroFieldOffices } from "./eroFieldOffices";
-import { templateOptions } from "./templateConfig";
 
 export interface CaseFormData {
   civilNo: string;
@@ -97,12 +96,6 @@ export const formSections: { title: string; fields: FieldConfig[] }[] = [
   {
     title: "Case Information",
     fields: [
-      {
-        key: "template",
-        label: "Document Template",
-        type: "select",
-        options: templateOptions.map((t) => t.value),
-      },
       { key: "civilNo", label: "Civil No.", type: "text", placeholder: "e.g., 4:26-cv-00000" },
       {
         key: "status",

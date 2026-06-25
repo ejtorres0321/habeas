@@ -37,6 +37,23 @@ function v(val: string | undefined, fallback = "[___]") {
   return val && val.trim() ? val.trim() : fallback;
 }
 
+/** Split caption text into fixed-width lines so each line gets its own § (matches generateDocument.ts) */
+function wrapCaptionText(text: string, maxLen = 36): string[] {
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let cur = "";
+  for (const w of words) {
+    if (cur && (cur + " " + w).length > maxLen) {
+      lines.push(cur);
+      cur = w;
+    } else {
+      cur = cur ? cur + " " + w : w;
+    }
+  }
+  if (cur) lines.push(cur);
+  return lines.length ? lines : [""];
+}
+
 function formatDate(val: string | undefined, fallback = "[___]") {
   if (!val || !val.trim()) return fallback;
   const date = new Date(val.trim() + "T00:00:00");
@@ -82,8 +99,20 @@ export default function OklahomaDocument({ data }: { data: OklahomaDocumentData 
   const removalDate = formatDate(data.removalOrderDate);
   const dur = detentionDuration(data.detentionDate, data.monthsDetained);
 
+  const petitionerLines = wrapCaptionText(`${v(data.petitionerName).toUpperCase()},`);
+  const resp1Lines = wrapCaptionText(`1. ${warden.toUpperCase()}, in the official capacity as Warden of the ${facility};`);
+  const resp2Lines = wrapCaptionText(`2. ${fod.toUpperCase()}, in his official capacity as Field Office Director of ICE Enforcement and Removal Operations ${ero};`);
+  const resp3Lines = wrapCaptionText("3. MARKWAYNE MULLIN, in his official capacity as Secretary of the Department of Homeland Security;");
+  const resp4Lines = wrapCaptionText("4. TODD BLANCHE, in his official capacity as Acting Attorney General of the United States,");
+  const capRow = (l: string, key: string, indent = false) => (
+    <tr key={key}><td className={`align-top whitespace-nowrap${indent ? " caption-indent pl-5" : ""}`}>{l}</td><td className="align-top">&sect;</td><td></td></tr>
+  );
+
   return (
     <>
+      {/* Page-number hint (header in DOCX); excluded from export */}
+      <p className="preview-page-number text-center mb-6" contentEditable={false}>1</p>
+
       {/* === CAPTION === */}
       <div id="caption">
         <div className="text-center mb-4">
@@ -102,33 +131,30 @@ export default function OklahomaDocument({ data }: { data: OklahomaDocumentData 
               <col style={{ width: "42%" }} />
             </colgroup>
             <tbody>
-              <tr><td>{v(data.petitionerName).toUpperCase()},</td><td>&sect;</td><td></td></tr>
+              {petitionerLines.map((l, i) => capRow(l, `pet${i}`, i > 0))}
               <tr><td></td><td>&sect;</td><td></td></tr>
-              <tr><td className="italic pl-4">Petitioner</td><td>&sect;</td><td></td></tr>
+              <tr><td>Petitioner</td><td>&sect;</td><td></td></tr>
               <tr><td></td><td>&sect;</td><td></td></tr>
               <tr><td></td><td>&sect;</td><td className="font-bold">PETITION FOR</td></tr>
               <tr><td>v.</td><td>&sect;</td><td className="font-bold">WRIT OF HABEAS CORPUS</td></tr>
-              <tr><td></td><td>&sect;</td><td className="font-bold">PURSUANT TO 28 U.S.C &sect;2241</td></tr>
-              <tr><td>1. {warden.toUpperCase()}, in the official capacity</td><td>&sect;</td><td></td></tr>
-              <tr><td className="caption-indent pl-4">as Warden of the {facility};</td><td>&sect;</td><td></td></tr>
+              <tr><td></td><td>&sect;</td><td className="font-bold">PURSUANT TO 28 U.S.C</td></tr>
+              <tr><td></td><td>&sect;</td><td className="font-bold">&sect;2241</td></tr>
+              {resp1Lines.map((l, i) => capRow(l, `r1${i}`, i > 0))}
               <tr><td></td><td>&sect;</td><td></td></tr>
-              <tr><td>2. {fod.toUpperCase()}, in his official capacity as</td><td>&sect;</td><td></td></tr>
-              <tr><td className="caption-indent pl-4">Field Office Director of ICE Enforcement and</td><td>&sect;</td><td></td></tr>
-              <tr><td className="caption-indent pl-4">Removal Operations {ero};</td><td>&sect;</td><td></td></tr>
+              {resp2Lines.map((l, i) => capRow(l, `r2${i}`, i > 0))}
               <tr><td></td><td>&sect;</td><td></td></tr>
-              <tr><td>3. MARKWAYNE MULLIN, in his official capacity</td><td>&sect;</td><td></td></tr>
-              <tr><td className="caption-indent pl-4">as Secretary of the Department of Homeland Security;</td><td>&sect;</td><td></td></tr>
+              {resp3Lines.map((l, i) => capRow(l, `r3${i}`, i > 0))}
               <tr><td></td><td>&sect;</td><td></td></tr>
-              <tr><td>4. TODD BLANCHE, in his official capacity as</td><td>&sect;</td><td></td></tr>
-              <tr><td className="caption-indent pl-4">Acting Attorney General of the United States,</td><td>&sect;</td><td></td></tr>
+              {resp4Lines.map((l, i) => capRow(l, `r4${i}`, i > 0))}
               <tr><td></td><td>&sect;</td><td></td></tr>
-              <tr><td className="italic pl-4">Respondents.</td><td>&sect;</td><td></td></tr>
+              <tr><td>Respondents.</td><td>&sect;</td><td></td></tr>
             </tbody>
           </table>
         </div>
 
         <div className="text-center font-bold mb-8">
-          <p>PETITION FOR WRIT OF HABEAS CORPUS PURSUANT TO 28 U.S.C. &sect;2241</p>
+          <p>PETITION FOR WRIT OF HABEAS CORPUS PURSUANT TO 28 U.S.C.</p>
+          <p>&sect;2241</p>
           <p>AND COMPLAINT FOR DECLARATORY AND INJUNCTIVE RELIEF</p>
         </div>
       </div>
@@ -287,27 +313,27 @@ export default function OklahomaDocument({ data }: { data: OklahomaDocumentData 
       {/* === VI. VERIFICATION === */}
       <div id="verification">
         <h2 className="text-center font-bold underline mt-8 mb-4">VI. VERIFICATION</h2>
-        <p className="indent-8 mb-6 text-justify">I declare under penalty of perjury that the foregoing is true and correct.</p>
+        <p className="text-center mb-6">I declare under penalty of perjury that the foregoing is true and correct.</p>
 
         <div className="mt-8">
           <p>Respectfully submitted,</p>
-          <p className="mt-6">/s/ Manuel E. Solis</p>
+          <p className="italic underline mt-6">/s/ Manuel E. Solis</p>
           <p className="font-bold">Manuel E. Solis</p>
           <p>Attorney for Petitioner</p>
           <p>State Bar No. 18826790</p>
           <p>P.O. Box 230593</p>
           <p>Houston TX 77223</p>
           <p>Houston Office: 713-481-1030</p>
-          <p>casestatus@manuelsolis.com</p>
-          <p className="mt-6">/s/ {lc.name}</p>
+          <p><a href="mailto:casestatus@manuelsolis.com" className="text-blue-700 underline">casestatus@manuelsolis.com</a></p>
+          <p className="italic underline mt-6">/s/ {lc.name}</p>
           <p className="font-bold">{lc.name}, {lc.bar}</p>
           <p>{lc.firm}</p>
           {lc.addressLines.map((l) => (
             <p key={l}>{l}</p>
           ))}
           <p>{lc.phone}</p>
-          <p>{lc.email}</p>
-          <p>Local Counsel</p>
+          <p><a href={`mailto:${lc.email}`} className="text-blue-700 underline">{lc.email}</a></p>
+          <p className="italic">Local Counsel</p>
         </div>
       </div>
 
@@ -358,7 +384,7 @@ function OkCertificate({ date, respondent, address, via = "USPS Mail", lcName }:
         <p className="flex justify-between"><span className="italic underline">/s/ Manuel Solis</span><span className="underline">{date}</span></p>
         <p className="flex justify-between"><span>Manuel Solis</span><span className="underline">Date</span></p>
         <p>Attorney for Petitioner</p>
-        <p className="italic mt-4">/s/ {lcName}</p>
+        <p className="italic underline mt-4">/s/ {lcName}</p>
         <p>{lcName}</p>
         <p>Local Counsel</p>
       </div>
