@@ -135,4 +135,11 @@ const CaseSchema = new Schema<ICase>(
   { timestamps: true }
 );
 
-export default mongoose.models.Case || mongoose.model<ICase>("Case", CaseSchema);
+// Re-register the model on each module load so schema changes (e.g. newly added
+// fields like `removalOrderDate`) are picked up during dev hot-reloads instead of
+// silently using a stale cached schema that drops the new fields on save.
+if (mongoose.models.Case) {
+  mongoose.deleteModel("Case");
+}
+
+export default mongoose.model<ICase>("Case", CaseSchema);
