@@ -28,6 +28,13 @@ export async function connectToDatabase() {
     cached.promise = mongoose.connect(MONGODB_URI);
   }
 
-  cached.conn = await cached.promise;
+  try {
+    cached.conn = await cached.promise;
+  } catch (err) {
+    // Don't cache a rejected promise — otherwise every later request reuses the
+    // failed connection (e.g. DB was down at boot) and keeps throwing until restart.
+    cached.promise = null;
+    throw err;
+  }
   return cached.conn;
 }
