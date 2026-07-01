@@ -35,12 +35,13 @@ export async function POST(
     return NextResponse.json({ error: "Case not found" }, { status: 404 });
   }
 
-  const { html } = await request.json();
+  const { html, template } = await request.json();
   const filename = getFilename(caseDoc.petitionerName);
+  const templateId = template || caseDoc.template;
 
   if (html) {
     try {
-      const doc = generateFromHTML(html);
+      const doc = generateFromHTML(html, templateId);
       const buffer = await Packer.toBuffer(doc);
       return docxResponse(buffer, filename);
     } catch (e) {
@@ -49,7 +50,7 @@ export async function POST(
   }
 
   // Fallback: generate from structured fields
-  const doc = generateHabeasDocument(caseDoc.toObject());
+  const doc = generateHabeasDocument({ ...caseDoc.toObject(), template: caseDoc.template });
   const buffer = await Packer.toBuffer(doc);
   return docxResponse(buffer, filename);
 }
@@ -68,7 +69,7 @@ export async function GET(
     return NextResponse.json({ error: "Case not found" }, { status: 404 });
   }
 
-  const doc = generateHabeasDocument(caseDoc.toObject());
+  const doc = generateHabeasDocument({ ...caseDoc.toObject(), template: caseDoc.template });
   const buffer = await Packer.toBuffer(doc);
   return docxResponse(buffer, getFilename(caseDoc.petitionerName));
 }

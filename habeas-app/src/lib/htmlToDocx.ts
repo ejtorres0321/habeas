@@ -8,6 +8,7 @@
 
 import { load, type CheerioAPI, type Cheerio } from "cheerio";
 import type { Element as DomElement, Text as DomText, AnyNode } from "domhandler";
+import { getTemplateConfig } from "./templateConfig";
 import {
   Document,
   Paragraph,
@@ -24,19 +25,21 @@ import {
   BorderStyle,
   TabStopType,
   TabStopPosition,
+  ExternalHyperlink,
 } from "docx";
 
 // ---------- helpers matching generateDocument.ts formatting ----------
 
 const FONT = "Times New Roman";
-const SIZE = 24; // 12pt in half-points
+let CURRENT_SIZE = 24;
+let IS_OKLAHOMA = false;
 
 /** Only pass truthy formatting flags so docx doesn't emit val="false" */
 function mkRun(text: string, opts: { bold?: boolean; italic?: boolean; underline?: boolean } = {}): TextRun {
   return new TextRun({
     text,
     font: FONT,
-    size: SIZE,
+    size: CURRENT_SIZE,
     bold: opts.bold || undefined,
     italics: opts.italic || undefined,
     underline: opts.underline ? { type: UnderlineType.SINGLE } : undefined,
@@ -50,6 +53,7 @@ interface RunDef {
   bold: boolean;
   italic: boolean;
   underline: boolean;
+  link?: string;
 }
 
 /** Recursively extract text runs with formatting from an element's children */
@@ -68,10 +72,14 @@ function extractRuns(
     } else if (node.type === "tag") {
       const tag = (node as DomElement).name?.toLowerCase();
       const child = $(node);
-      const next = { ...inherited };
+      const next: { bold: boolean; italic: boolean; underline: boolean; link?: string } = { ...inherited };
       if (tag === "strong" || tag === "b") next.bold = true;
       if (tag === "em" || tag === "i") next.italic = true;
       if (tag === "u") next.underline = true;
+      if (tag === "a") {
+        next.link = child.attr("href") || undefined;
+        next.underline = true;
+      }
       runs.push(...extractRuns(child, $, next));
     }
   });
@@ -87,13 +95,27 @@ interface ParseCtx {
 
 const defaultCtx: ParseCtx = { centerAlign: false, parentBold: false };
 
+function runFromDef(r: RunDef): TextRun {
+  return mkRun(r.text, { bold: r.bold, italic: r.italic, underline: r.underline });
+}
+
+function runChild(r: RunDef): TextRun | ExternalHyperlink {
+  if (r.link) {
+    return new ExternalHyperlink({
+      link: r.link,
+      children: [new TextRun({ text: r.text, font: FONT, size: CURRENT_SIZE, color: "0563C1", underline: { type: UnderlineType.SINGLE } })],
+    });
+  }
+  return runFromDef(r);
+}
+
 // ---------- paragraph builders (same formatting as generateDocument.ts) ----------
 
 function centeredPara(runs: RunDef[]): Paragraph {
   return new Paragraph({
     alignment: AlignmentType.CENTER,
     spacing: { after: 120 },
-    children: runs.map((r) => mkRun(r.text, r)),
+    children: runs.map(runFromDef),
   });
 }
 
@@ -119,7 +141,7 @@ function bodyPara(runs: RunDef[], justify: boolean): Paragraph {
     alignment: justify ? AlignmentType.JUSTIFIED : AlignmentType.LEFT,
     spacing: { after: 200, line: 360 },
     indent: { firstLine: 720 },
-    children: runs.map((r) => mkRun(r.text, r)),
+    children: runs.map(runFromDef),
   });
 }
 
@@ -128,7 +150,7 @@ function subItemPara(runs: RunDef[]): Paragraph {
     alignment: AlignmentType.JUSTIFIED,
     spacing: { after: 120, line: 360 },
     indent: { left: 1440, hanging: 360 },
-    children: runs.map((r) => mkRun(r.text, r)),
+    children: runs.map(runFromDef),
   });
 }
 
@@ -136,7 +158,7 @@ function signaturePara(runs: RunDef[], spacing = 60): Paragraph {
   return new Paragraph({
     spacing: { after: spacing },
     indent: { left: 5760 },
-    children: runs.map((r) => mkRun(r.text, r)),
+    children: runs.map(runFromDef),
   });
 }
 
@@ -165,6 +187,28 @@ function certSignatureBlock(date: string): Paragraph[] {
   ];
 }
 
+/** Oklahoma certificate signature block: right-tab date + local counsel (matches generateDocument.ts) */
+function okCertSignatureBlock(date: string): Paragraph[] {
+  const lc = getTemplateConfig("oklahoma").localCounsel!;
+  const rightTab = { type: TabStopType.RIGHT, position: TabStopPosition.MAX };
+  return [
+    new Paragraph({
+      spacing: { after: 60 },
+      tabStops: [rightTab],
+      children: [mkRun("/s/ Manuel Solis", { italic: true, underline: true }), mkRun("\t"), mkRun(date, { underline: true })],
+    }),
+    new Paragraph({
+      spacing: { after: 60 },
+      tabStops: [rightTab],
+      children: [mkRun("Manuel Solis"), mkRun("\t"), mkRun("Date", { underline: true })],
+    }),
+    new Paragraph({ spacing: { after: 120 }, children: [mkRun("Attorney for Petitioner")] }),
+    new Paragraph({ spacing: { after: 60 }, children: [mkRun(`/s/ ${lc.name}`, { italic: true, underline: true })] }),
+    new Paragraph({ spacing: { after: 60 }, children: [mkRun(lc.name)] }),
+    new Paragraph({ spacing: { after: 300 }, children: [mkRun("Local Counsel")] }),
+  ];
+}
+
 /** Extract date from certificate body text: "On April 30, 2026, Counsel..." → "April 30, 2026" */
 function extractDateFromCertText(text: string): string {
   const m = text.match(/^On\s+(.+?),\s+Counsel/i);
@@ -187,7 +231,7 @@ function borderLine(spacing = 0): Paragraph {
 const noBorder = { style: BorderStyle.NONE, size: 0, space: 0, color: "FFFFFF" };
 const noBorders = { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder };
 
-function captionRow(leftText: string, rightText: string): TableRow {
+function captionRow(leftText: string, rightText: string, indentLeft = 0): TableRow {
   return new TableRow({
     children: [
       new TableCell({
@@ -196,6 +240,7 @@ function captionRow(leftText: string, rightText: string): TableRow {
         children: [
           new Paragraph({
             spacing: { after: 0, line: 240 },
+            indent: indentLeft ? { left: indentLeft } : undefined,
             children: leftText ? [mkRun(leftText)] : [],
           }),
         ],
@@ -230,7 +275,9 @@ function parseTable(tableEl: Cheerio<AnyNode>, $: CheerioAPI): Table {
     const cells = $(tr).find("td");
     const left = cells.eq(0).text().trim();
     const right = cells.eq(2).text().trim();
-    rows.push(captionRow(left, right));
+    const leftClass = cells.eq(0).attr("class") || "";
+    const indentLeft = leftClass.includes("caption-indent") ? 288 : 0;
+    rows.push(captionRow(left, right, indentLeft));
   });
   if (!rows.length) rows.push(captionRow("", ""));
   return new Table({
@@ -262,6 +309,9 @@ function parseElement(
   const tag = (node as DomElement).name?.toLowerCase();
   const classes = cls(el);
 
+  // Preview-only elements (e.g. page-number hint) — DOCX renders these via header/footer
+  if (has(classes, "preview-page-number")) return [];
+
   // Section headers
   if (tag === "h2") {
     return [sectionTitle(el.text().trim())];
@@ -278,7 +328,7 @@ function parseElement(
   if (tag === "p") {
     // Determine inherited bold: from parent div context OR from own font-bold class
     const isBold = ctx.parentBold || has(classes, "font-bold");
-    const inherited = { bold: isBold, italic: has(classes, "italic"), underline: false };
+    const inherited = { bold: isBold, italic: has(classes, "italic"), underline: has(classes, "underline") };
     const runs = extractRuns(el, $, inherited);
     if (!runs.length || runs.every((r) => !r.text.trim())) return [];
 
@@ -307,7 +357,7 @@ function parseElement(
       new Paragraph({
         alignment: isJustify ? AlignmentType.JUSTIFIED : AlignmentType.LEFT,
         spacing: { after: 120 },
-        children: runs.map((r) => mkRun(r.text, r)),
+        children: runs.map(runChild),
       }),
     ];
   }
@@ -334,7 +384,10 @@ function parseElement(
         const certDate = prevSibling.length
           ? extractDateFromCertText(prevSibling.text().trim())
           : "[___]";
-        return [emptyLine(), ...certSignatureBlock(certDate)];
+        return [
+          emptyLine(),
+          ...(IS_OKLAHOMA ? okCertSignatureBlock(certDate) : certSignatureBlock(certDate)),
+        ];
       }
     }
 
@@ -358,7 +411,10 @@ function parseElement(
 
 // ---------- public API ----------
 
-export function generateFromHTML(html: string): Document {
+export function generateFromHTML(html: string, template?: string | null): Document {
+  const tplConfig = getTemplateConfig(template);
+  CURRENT_SIZE = tplConfig.fontSizeHalfPoints;
+  IS_OKLAHOMA = tplConfig.id === "oklahoma";
   const $ = load(html);
 
   const children: (Paragraph | Table)[] = [];
@@ -378,6 +434,7 @@ export function generateFromHTML(html: string): Document {
       {
         properties: {
           page: {
+            ...(IS_OKLAHOMA ? { size: { width: 12240, height: 15840 } } : {}),
             margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
             pageNumbers: { start: 1, formatType: NumberFormat.DECIMAL },
           },
@@ -391,7 +448,7 @@ export function generateFromHTML(html: string): Document {
                   new TextRun({
                     children: [PageNumber.CURRENT],
                     font: FONT,
-                    size: 20,
+                    size: CURRENT_SIZE - 4,
                   }),
                 ],
               }),

@@ -3,6 +3,7 @@ import { eroFieldOffices } from "./eroFieldOffices";
 export interface CaseFormData {
   civilNo: string;
   status: "draft" | "filed" | "resolved";
+  template: "texas" | "oklahoma";
   petitionerName: string;
   petitionerAge: string;
   petitionerAddress: string;
@@ -21,6 +22,7 @@ export interface CaseFormData {
   immigrationCourtLocation: string;
   nextHearingDate: string;
   reliefType: string;
+  removalOrderDate: string;
   familyDetails: string;
   spouseInfo: string;
   childrenInfo: string;
@@ -42,6 +44,7 @@ export interface CaseFormData {
 export const defaultCaseData: CaseFormData = {
   civilNo: "",
   status: "draft",
+  template: "texas",
   petitionerName: "",
   petitionerAge: "",
   petitionerAddress: "",
@@ -60,6 +63,7 @@ export const defaultCaseData: CaseFormData = {
   immigrationCourtLocation: "",
   nextHearingDate: "",
   reliefType: "",
+  removalOrderDate: "",
   familyDetails: "",
   spouseInfo: "",
   childrenInfo: "",
@@ -153,6 +157,12 @@ export const formSections: { title: string; fields: FieldConfig[] }[] = [
         label: "Type of Relief Sought",
         type: "select",
         options: ["asylum", "cancellation of removal under 8 U.S.C. \u00A71229b(b)", "both"],
+      },
+      {
+        key: "removalOrderDate",
+        label: "Removal Order Date (Oklahoma — IJ order, BIA appeal pending)",
+        type: "date",
+        visibleWhen: { field: "template", value: "oklahoma" },
       },
     ],
   },

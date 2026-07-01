@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { CaseFormData, formSections } from "@/lib/caseFields";
+import { templateOptions } from "@/lib/templateConfig";
 import { facilities, getFacilityAddress } from "@/lib/facilities";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
 import { immigrationCourts } from "@/lib/immigrationCourts";
@@ -59,6 +60,13 @@ export default function CaseForm({ initialData, caseId }: CaseFormProps) {
       }
       return next;
     });
+    if (key === "template" && caseId) {
+      fetch(`/api/cases/${caseId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ template: value, documentHTML: "" }),
+      }).catch(() => {});
+    }
   }
 
   async function triggerAiReview(data: CaseFormData) {
@@ -148,6 +156,26 @@ export default function CaseForm({ initialData, caseId }: CaseFormProps) {
           </div>
         )}
 
+        <div className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-sm border border-blue-200 p-6">
+          <label className="block text-sm font-semibold text-blue-900 mb-1.5">
+            Document Template
+          </label>
+          <p className="text-xs text-blue-700/80 mb-3">
+            Choose the jurisdiction template used to generate this petition.
+          </p>
+          <select
+            value={formData.template}
+            onChange={(e) => handleChange("template", e.target.value)}
+            className="w-full md:w-1/2 px-3 py-2 border border-blue-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+          >
+            {templateOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {formSections.map((section) => (
           <div key={section.title} className="mb-8 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
@@ -173,11 +201,17 @@ export default function CaseForm({ initialData, caseId }: CaseFormProps) {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
                     >
                       <option value="">-- Select --</option>
-                      {field.options?.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt.charAt(0).toUpperCase() + opt.slice(1)}
-                        </option>
-                      ))}
+                      {field.key === "template"
+                        ? templateOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))
+                        : field.options?.map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                            </option>
+                          ))}
                     </select>
                   ) : field.key === "petitionerAddress" ? (
                     <AddressAutocomplete

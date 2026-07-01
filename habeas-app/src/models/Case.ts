@@ -1,9 +1,12 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+export type CaseTemplate = "texas" | "oklahoma";
+
 export interface ICase extends Document {
   // Case Info
   civilNo: string;
   status: "draft" | "filed" | "resolved";
+  template: CaseTemplate;
 
   // Petitioner
   petitionerName: string;
@@ -30,6 +33,7 @@ export interface ICase extends Document {
   immigrationCourtLocation: string;
   nextHearingDate: string;
   reliefType: string; // asylum / cancellation of removal
+  removalOrderDate: string; // Oklahoma template: IJ removal order date (BIA appeal pending)
 
   // Family
   familyDetails: string;
@@ -76,6 +80,7 @@ const CaseSchema = new Schema<ICase>(
   {
     civilNo: { type: String, default: "" },
     status: { type: String, enum: ["draft", "filed", "resolved"], default: "draft" },
+    template: { type: String, enum: ["texas", "oklahoma"], default: "texas" },
 
     petitionerName: { type: String, default: "" },
     petitionerAge: { type: String, default: "" },
@@ -98,6 +103,7 @@ const CaseSchema = new Schema<ICase>(
     immigrationCourtLocation: { type: String, default: "" },
     nextHearingDate: { type: String, default: "" },
     reliefType: { type: String, default: "" },
+    removalOrderDate: { type: String, default: "" },
 
     familyDetails: { type: String, default: "" },
     spouseInfo: { type: String, default: "" },
@@ -129,4 +135,11 @@ const CaseSchema = new Schema<ICase>(
   { timestamps: true }
 );
 
-export default mongoose.models.Case || mongoose.model<ICase>("Case", CaseSchema);
+// Re-register the model on each module load so schema changes (e.g. newly added
+// fields like `removalOrderDate`) are picked up during dev hot-reloads instead of
+// silently using a stale cached schema that drops the new fields on save.
+if (mongoose.models.Case) {
+  mongoose.deleteModel("Case");
+}
+
+export default mongoose.model<ICase>("Case", CaseSchema);

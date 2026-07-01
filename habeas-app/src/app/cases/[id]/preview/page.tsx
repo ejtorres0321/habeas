@@ -4,10 +4,13 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import DocumentAIPanel from "@/components/DocumentAIPanel";
+import OklahomaDocument from "@/components/OklahomaDocument";
 import { getEroFieldOfficeAddress } from "@/lib/eroFieldOffices";
+import { getTemplateConfig } from "@/lib/templateConfig";
 
 interface CaseData {
   _id: string;
+  template?: string;
   civilNo: string;
   status: string;
   petitionerName: string;
@@ -83,6 +86,17 @@ const remainingSections: Section[] = [
   { id: "service", label: "Certificates of Service" },
 ];
 
+const oklahomaRemainingSections: Section[] = [
+  { id: "claim", label: "IV. Claim for Relief" },
+  { id: "claim-a", label: "A. Substantive/Procedural DP", indent: true },
+  { id: "claim-b", label: "B. Procedural Due Process", indent: true },
+  { id: "claim-c", label: "C. As-Applied Challenge", indent: true },
+  { id: "claim-d", label: "D. No Exhaustion Required", indent: true },
+  { id: "prayer", label: "V. Prayer for Relief" },
+  { id: "verification", label: "VI. Verification" },
+  { id: "service", label: "Certificates of Service" },
+];
+
 export default function PreviewPage() {
   const params = useParams();
   const id = params.id as string;
@@ -114,7 +128,9 @@ export default function PreviewPage() {
     fetchData();
   }, [fetchData]);
 
-  const sections: Section[] = [...baseSections, ...remainingSections];
+  const sections: Section[] = data?.template === "oklahoma"
+    ? [...baseSections, ...oklahomaRemainingSections]
+    : [...baseSections, ...remainingSections];
 
   // Extract document text for AI panel once rendered
   useEffect(() => {
@@ -206,7 +222,7 @@ export default function PreviewPage() {
       const res = await fetch(`/api/cases/${id}/docx`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ html: currentHTML }),
+        body: JSON.stringify({ html: currentHTML, template: data?.template }),
       });
       if (!res.ok) throw new Error("Download failed");
       const blob = await res.blob();
@@ -267,6 +283,8 @@ export default function PreviewPage() {
     );
   }
 
+  const tpl = getTemplateConfig(data.template);
+  const docStyle = { fontFamily: "'Times New Roman', Times, serif", fontSize: tpl.fontSizeCSS };
   const hasCriminal = data.hasCriminalHistory === "yes";
   const pro = data.petitionerGender === "female"
     ? { subject: "she", Subject: "She", object: "her", possessive: "her", Possessive: "Her" }
@@ -283,7 +301,17 @@ export default function PreviewPage() {
       {/* Print styles */}
       <style>{`
         @media print {
-          @page { size: letter; margin: 1in; }
+          @page {
+            size: letter;
+            margin: 1in;
+            @top-center {
+              content: counter(page);
+              font-family: 'Times New Roman', Times, serif;
+              font-size: ${tpl.fontSizeCSS};
+            }
+          }
+          /* The on-screen page-number hint would duplicate the @page counter */
+          .preview-page-number { display: none !important; }
           html, body {
             background: white !important;
             height: auto !important;
@@ -420,30 +448,42 @@ export default function PreviewPage() {
               contentEditable
               suppressContentEditableWarning
               data-print-document
-              className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-16 font-serif text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2"
-              style={{ fontFamily: "'Times New Roman', Times, serif" }}
+              className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-16 font-serif leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2"
+              style={docStyle}
               dangerouslySetInnerHTML={{ __html: data.documentHTML }}
             />
+          ) : data.template === "oklahoma" ? (
+            <div
+              ref={documentTextRef}
+              contentEditable
+              suppressContentEditableWarning
+              data-print-document
+              className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-16 font-serif leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2"
+              style={docStyle}
+            >
+              <OklahomaDocument data={data} />
+            </div>
           ) : (
           <div
             ref={documentTextRef}
             contentEditable
             suppressContentEditableWarning
             data-print-document
-            className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-16 font-serif text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2"
-            style={{ fontFamily: "'Times New Roman', Times, serif" }}
+            className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-16 font-serif leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2"
+            style={docStyle}
           >
             {/* === CAPTION === */}
             <div id="caption">
               <div className="text-center mb-4">
                 <p className="font-bold">UNITED STATES DISTRICT COURT</p>
-                <p className="font-bold">FOR THE SOUTHERN DISTRICT OF TEXAS</p>
-                <p className="font-bold">HOUSTON DIVISION</p>
+                {tpl.captionLines.map((line) => (
+                  <p key={line} className="font-bold">{line}</p>
+                ))}
                 <p className="font-bold">CIVIL No. {v(data.civilNo, "__________")}</p>
               </div>
 
               <div className="border-t border-b border-black py-2 mb-6">
-                <table className="w-full" style={{ tableLayout: "fixed" }}>
+                <table className="w-full leading-tight" style={{ tableLayout: "fixed" }}>
                   <colgroup>
                     <col style={{ width: "55%" }} />
                     <col style={{ width: "3%" }} />
@@ -461,9 +501,9 @@ export default function PreviewPage() {
                     <tr><td>as {v(data.wardenTitle, "Warden")} of the {v(data.facilityName)}</td><td>&sect;</td><td></td></tr>
                     <tr><td>Detention Center;</td><td>&sect;</td><td></td></tr>
                     <tr><td></td><td>&sect;</td><td></td></tr>
-                    <tr><td>{v(data.fieldOfficeDirector, "BRET BRADFORD").toUpperCase()}, in his official capacity as</td><td>&sect;</td><td></td></tr>
+                    <tr><td>{v(data.fieldOfficeDirector, tpl.defaultFieldOfficeDirector).toUpperCase()}, in his official capacity as</td><td>&sect;</td><td></td></tr>
                     <tr><td>Field Office Director of ICE Enforcement and</td><td>&sect;</td><td></td></tr>
-                    <tr><td>Removal Operations {v(data.eroFieldOffice, "Houston Field Office")};</td><td>&sect;</td><td></td></tr>
+                    <tr><td>Removal Operations {v(data.eroFieldOffice, tpl.defaultEroFieldOffice)};</td><td>&sect;</td><td></td></tr>
                     <tr><td></td><td>&sect;</td><td></td></tr>
                     <tr><td>MARKWAYNE MULLIN, in his official capacity</td><td>&sect;</td><td></td></tr>
                     <tr><td>as Secretary of the Department of Homeland</td><td>&sect;</td><td></td></tr>
@@ -510,8 +550,8 @@ export default function PreviewPage() {
               <h2 className="text-center font-bold underline mt-8 mb-4">II. JURISDICTION AND AUTHORITY</h2>
 
               <p className="indent-8 mb-3">{p()}. Jurisdiction lies under 28 U.S.C. &sect;2241 and 28 U.S.C. &sect;1331.</p>
-              <p className="indent-8 mb-3 text-justify">{p()}. The Fifth Circuit recognizes habeas jurisdiction over challenges to the fact and legality of immigration detention, including constitutional claims. See <em>Zadvydas v. Davis</em>, 533 U.S. 678 (2001); <em>Pierre v. United States</em>, 525 F.2d 933 (5th Cir. 1976).</p>
-              <p className="indent-8 mb-3 text-justify">{p()}. This Court has authority to issue a TRO to halt ongoing constitutional violations. See <em>Opulent Life Church v. City of Holly Springs</em>, 697 F.3d 279, 295 (5th Cir. 2012).</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. The {tpl.circuitName} Circuit recognizes habeas jurisdiction over challenges to the fact and legality of immigration detention, including constitutional claims. See <em>Zadvydas v. Davis</em>, 533 U.S. 678 (2001); <em>{tpl.habeasSecondaryCase}</em>, {tpl.habeasSecondaryCite}.</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. This Court has authority to issue a TRO to halt ongoing constitutional violations. See <em>{tpl.troCase}</em>, {tpl.troCite}.</p>
             </div>
 
             {/* === III. STATEMENT OF FACTS === */}
@@ -661,7 +701,7 @@ export default function PreviewPage() {
                 : `The government\u2019s prolonged non-enforcement over ${v(data.yearsInUS)} years, combined with Petitioner\u2019s complete compliance with all applicable laws during that period, demonstrates that Petitioner presents no flight risk or danger. `}
                 <em>Salerno</em>, 481 U.S. at 748.</p>
               <p className="indent-8 mb-3 text-justify">{p()}. Now, with no change in Petitioner&rsquo;s individual circumstances, the government has detained {pro.object} based solely on a policy change following <em>Buenrostro-Mendez</em>. This is the paradigm of arbitrary action.</p>
-              <p className="indent-8 mb-3 text-justify">{p()}. While the Fifth Circuit has not recognized a formal doctrine of &ldquo;non-enforcement acquiescence&rdquo; in the immigration detention context, the due process prohibition on arbitrary government action provides an independent basis for relief. See <em>Lewis</em>, 523 U.S. at 845&ndash;46.</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. While the {tpl.circuitName} Circuit has not recognized a formal doctrine of &ldquo;non-enforcement acquiescence&rdquo; in the immigration detention context, the due process prohibition on arbitrary government action provides an independent basis for relief. See <em>Lewis</em>, 523 U.S. at 845&ndash;46.</p>
               <p className="indent-8 mb-3 text-justify">{p()}. This arbitrary detention, premised solely on a policy change and Petitioner&rsquo;s manner of entry {v(data.yearsInUS)} years ago rather than any current, individualized assessment, violates the Fifth Amendment&rsquo;s due process guarantee.</p>
             </div>
 
@@ -683,7 +723,7 @@ export default function PreviewPage() {
               <p className="ml-12 mb-2">{hasCriminal ? "f" : "g"}. Detention based solely on a policy change, not individual facts.</p>
 
               <p className="indent-8 mb-3 text-justify">{p()}. The Fifth Circuit in <em>Buenrostro-Mendez</em> acknowledged that constitutional concerns about &sect;1225(b)(2)(A) were &ldquo;wholly speculative&rdquo; at the time. Slip op. at 21.</p>
-              <p className="indent-8 mb-3 text-justify">{p()}. Petitioner&rsquo;s case makes these concerns concrete, not speculative. This is precisely the type of as-applied challenge the Fifth Circuit did not address and could not foreclose.</p>
+              <p className="indent-8 mb-3 text-justify">{p()}. Petitioner&rsquo;s case makes these concerns concrete, not speculative. This is precisely the type of as-applied challenge the {tpl.circuitName} Circuit did not address and could not foreclose.</p>
               <p className="indent-8 mb-3 text-justify">{p()}. For all these reasons, Petitioner&rsquo;s continued detention violates the Fifth Amendment&rsquo;s guarantee of due process and equal protection.</p>
             </div>
 
@@ -736,7 +776,7 @@ export default function PreviewPage() {
 
               <h3 className="text-center font-bold mb-4 mt-8">CERTIFICATE OF SERVICE</h3>
               <p className="text-justify indent-8 mb-6">
-                On {formatDate(data.serviceDateFieldOffice)}, Counsel for Plaintiff served a copy of the attached Petition via USPS Mail, in compliance with Rule 4 of Federal Rules of Civil Procedure, upon the Respondent, {v(data.fieldOfficeDirector, "Bret Bradford")}, in his Official Capacity as Field Office Director, of ICE Enforcement and Removal Operations {v(data.eroFieldOffice, "Houston Field Office")}, at the Office of the Field Office Director, Enforcement and Removal Operations, {v(data.eroFieldOffice, "Houston Field Office")}, {getEroFieldOfficeAddress(data.eroFieldOffice) || "126 Northpoint Drive, Houston, Texas 77060"}.
+                On {formatDate(data.serviceDateFieldOffice)}, Counsel for Plaintiff served a copy of the attached Petition via USPS Mail, in compliance with Rule 4 of Federal Rules of Civil Procedure, upon the Respondent, {v(data.fieldOfficeDirector, tpl.defaultFieldOfficeDirector)}, in his Official Capacity as Field Office Director, of ICE Enforcement and Removal Operations {v(data.eroFieldOffice, tpl.defaultEroFieldOffice)}, at the Office of the Field Office Director, Enforcement and Removal Operations, {v(data.eroFieldOffice, tpl.defaultEroFieldOffice)}, {getEroFieldOfficeAddress(data.eroFieldOffice) || "126 Northpoint Drive, Houston, Texas 77060"}.
               </p>
               <div className="mb-2">
                 <p>/s/ Manuel Solis</p>
